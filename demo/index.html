@@ -842,9 +842,10 @@ function viewAbout(){
   const ramp=rampActive();
   app.innerHTML='<div class="wrap about"><p><a href="#/" id="backHome">← Home</a></p><h1>About the plan</h1>'+
     '<p class="muted">3-day full-body plan with a Home version and a Gym version. Pick Home or Gym on the home screen; the day rotates 1 → 2 → 3 either way. Tap any exercise to see its form guide.'+(ramp?' <b>You are in weeks 1–2: 2 sets of everything.</b>':'')+'</p>'+
+    '<div class="card"><h2>Rules</h2><ul>'+RULES.map(r=>'<li>'+esc(r)+'</li>').join("")+'</ul></div>'+
     '<h2 class="sec" id="homePlan">At home</h2><p class="muted small">'+esc(EQUIP)+'</p>'+planCards("home")+
     '<h2 class="sec" id="gymPlan">Gym</h2>'+planCards("gym")+
-    '<div class="card"><h2>Rules</h2><ul>'+RULES.map(r=>'<li>'+esc(r)+'</li>').join("")+'</ul></div>'+FOOT+'</div>';
+    FOOT+'</div>';
 }
 
 function viewExercise(ref){
