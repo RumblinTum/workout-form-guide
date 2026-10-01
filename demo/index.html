@@ -393,6 +393,7 @@ function today(){ const d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth(
 function dayDiff(a,b){ const p=s=>{const [y,m,d]=s.split("-").map(Number);return Date.UTC(y,m-1,d);}; return Math.round((p(b)-p(a))/864e5); }
 /* rotation A→B→C is shared by Home and Gym */
 function nextDay(){ const pk=store.get("wfg-demo-pick"); if(pk&&PLANS.home[pk]) return pk; const last=store.get("wfg-demo-last"); return last ? ({A:"B",B:"C",C:"A"})[last.day]||"A" : "A"; }
+const dayLabel=d=>({A:"1",B:"2",C:"3"})[d]||d;   /* display only; keys stay A/B/C */
 function rampActive(){ return false; } /* demo: always full sets */
 const itemsOf = s => PLANS[s.mode][s.day];
 const lastMode = () => { const m=store.get("wfg-demo-mode"); return MODES[m]?m:null; };
@@ -737,7 +738,7 @@ function viewHome(){
     '<h1 class="demo-h">A 3-days a week strength training tracker with form demos</h1>'+
     '<p class="demo-tag">Select Home for dumbbell only workout or Gym for full gym equipment workout</p>'+
     '<p class="demo-sub">Pick a day, tap Start, and check off each set.</p>'+
-    (s?'':'<div class="chooser" role="group" aria-label="Choose a day">'+["A","B","C"].map(d=>'<button data-day="'+d+'" aria-pressed="'+(d===day)+'"'+(d===day?' class="on"':'')+'>Day '+d+'</button>').join("")+'</div>')+
+    (s?'':'<div class="chooser" role="group" aria-label="Choose a day">'+["A","B","C"].map(d=>'<button data-day="'+d+'" aria-pressed="'+(d===day)+'"'+(d===day?' class="on"':'')+'>Day '+dayLabel(d)+'</button>').join("")+'</div>')+
     modePill(s)+startBtn(s)+
     (s?'<button class="linkbtn small" id="restartBtn">Start this workout over</button>':'')+
     '<div class="links">'+FOOT+'</div></div>';
@@ -776,7 +777,7 @@ function viewWorkout(){
   const s=current(); if(!s){ go("#/"); return; }
   const items=itemsOf(s); const i=Math.min(s.idx,items.length-1); const it=items[i]; const c=counts(s);
   app.innerHTML='<div class="top"><div class="top-in"><button class="x" id="homeBtn" aria-label="Home">✕</button><div class="meta">'+
-    '<div class="row"><span id="exPos">Day '+s.day+' · '+MODES[s.mode]+' · '+(i+1)+' of '+items.length+'</span><span id="dayProg">'+c.d+' of '+c.t+' sets</span></div>'+
+    '<div class="row"><span id="exPos">Day '+dayLabel(s.day)+' · '+MODES[s.mode]+' · '+(i+1)+' of '+items.length+'</span><span id="dayProg">'+c.d+' of '+c.t+' sets</span></div>'+
     '<div class="bar"><i id="dayBar" style="width:'+(c.t?c.d/c.t*100:0)+'%"></i></div></div></div></div>'+
     '<div class="ex">'+exBody(it.id,it,s,i,s.mode)+FOOT+'</div>'+
     '<div class="bottom"><div class="bottom-in"><button class="btn ghost" id="backBtn"'+(i===0?' disabled':'')+'>Back</button>'+
@@ -822,8 +823,8 @@ function wireHold(rng){
 function viewDone(){
   const last=store.get("wfg-demo-last");
   if(!last){ go("#/"); return; }
-  app.innerHTML='<div class="wrap done"><div class="big">✅</div><h1 id="doneTitle">Day '+last.day+' done — '+last.done+' of '+last.total+' sets</h1>'+
-    '<p class="muted">'+(MODES[last.mode]?MODES[last.mode]+' workout. ':'')+'Next time: Day '+nextDay()+'</p><div style="height:20px"></div>'+
+  app.innerHTML='<div class="wrap done"><div class="big">✅</div><h1 id="doneTitle">Day '+dayLabel(last.day)+' done — '+last.done+' of '+last.total+' sets</h1>'+
+    '<p class="muted">'+(MODES[last.mode]?MODES[last.mode]+' workout. ':'')+'Next time: Day '+dayLabel(nextDay())+'</p><div style="height:20px"></div>'+
     '<button class="btn primary" id="homeBtn" style="width:100%;max-width:360px">Back to home</button>'+
     '<p style="margin-top:28px"><a href="#/about">About the plan</a></p>'+FOOT+'</div>';
   $("homeBtn").onclick=()=>go("#/");
@@ -831,7 +832,7 @@ function viewDone(){
 
 function planCards(mode){
   return '<div class="about-grid">'+Object.keys(PLANS[mode]).map(d=>{ const items=PLANS[mode][d], ss=items.find(x=>x.ss===1);
-    return '<div class="card day"><h2><span>Day '+d+'</span><span class="muted small">'+planSets(mode,d,false)+' sets'+(ss?'*':'')+'</span></h2><ul class="plan-list">'+
+    return '<div class="card day"><h2><span>Day '+dayLabel(d)+'</span><span class="muted small">'+planSets(mode,d,false)+' sets'+(ss?'*':'')+'</span></h2><ul class="plan-list">'+
     items.map((it,j)=>{ const n=j+1-items.slice(0,j).filter(x=>x.ss===2).length;
       const sub=[it.ss===1?'superset with '+it.tag.replace("a","b")+', no rest between':it.ss===2?'rest after this one':'',it.side,it.note,'rest '+fmtRest(it.rest),it.fail?'last set can go to failure':''].filter(Boolean).join(' · ');
       return '<li><div><a href="#/ex/'+mode+'/'+d+'/'+j+'">'+(it.tag||n)+'. '+esc(EX[it.id].name)+(it.kb?' ⭐':'')+'</a><div class="muted small">'+esc(sub)+'</div></div><span class="muted">'+esc(it.repsText?it.sets+' sets':it.sets+' × '+it.reps)+'</span></li>'; }).join("")+
@@ -840,7 +841,7 @@ function planCards(mode){
 function viewAbout(){
   const ramp=rampActive();
   app.innerHTML='<div class="wrap about"><p><a href="#/" id="backHome">← Home</a></p><h1>About the plan</h1>'+
-    '<p class="muted">3-day full-body plan with a Home version and a Gym version. Pick Home or Gym on the home screen; the day rotates A → B → C either way. Tap any exercise to see its form guide.'+(ramp?' <b>You are in weeks 1–2: 2 sets of everything.</b>':'')+'</p>'+
+    '<p class="muted">3-day full-body plan with a Home version and a Gym version. Pick Home or Gym on the home screen; the day rotates 1 → 2 → 3 either way. Tap any exercise to see its form guide.'+(ramp?' <b>You are in weeks 1–2: 2 sets of everything.</b>':'')+'</p>'+
     '<h2 class="sec" id="homePlan">At home</h2><p class="muted small">'+esc(EQUIP)+'</p>'+planCards("home")+
     '<h2 class="sec" id="gymPlan">Gym</h2>'+planCards("gym")+
     '<div class="card"><h2>Rules</h2><ul>'+RULES.map(r=>'<li>'+esc(r)+'</li>').join("")+'</ul></div>'+FOOT+'</div>';
