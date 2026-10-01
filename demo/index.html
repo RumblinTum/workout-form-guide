@@ -735,7 +735,7 @@ function wireModeStart(s){
 function viewHome(){
   const s=current(); const day=s?s.day:nextDay();
   app.innerHTML='<div class="home">'+
-    '<h1 class="demo-h">A 3-days a week strength training tracker with form demos</h1>'+
+    '<h1 class="demo-h">3-days a Week Strength Training Tracker</h1>'+
     '<p class="demo-tag">Select Home for dumbbell only workout or Gym for full gym equipment workout</p>'+
     '<p class="demo-sub">Pick a day, tap Start, and check off each set.</p>'+
     (s?'':'<div class="chooser" role="group" aria-label="Choose a day">'+["A","B","C"].map(d=>'<button data-day="'+d+'" aria-pressed="'+(d===day)+'"'+(d===day?' class="on"':'')+'>Day '+dayLabel(d)+'</button>').join("")+'</div>')+
