@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Workout">
+<meta name="theme-color" content="#0f172a">
+<title>Workout Form Guide</title>
+<style>
+:root{
+  --bg:#f4f6fb;--card:#ffffff;--ink:#0f172a;--muted:#5b6475;--line:#e2e6ee;
+  --accent:#2563eb;--accent-ink:#fff;--ok:#16a34a;--warn:#b45309;--far:#a3adbd;--near:#1e293b;--prop:#cbd2dd;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#0b1120;--card:#141c2f;--ink:#e8edf6;--muted:#9aa5b8;--line:#25304a;
+    --accent:#3b82f6;--ok:#22c55e;--warn:#f59e0b;--far:#55627a;--near:#e2e8f0;--prop:#33405a;}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--accent)}
+.wrap{max-width:640px;margin:0 auto;padding:16px 16px calc(120px + env(safe-area-inset-bottom))}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0}
+h1{font-size:28px;line-height:1.15;margin:4px 0 6px}
+h2{font-size:19px;margin:0 0 8px}
+ul{margin:6px 0 0;padding-left:20px}
+li{margin:4px 0}
+
+/* Home */
+.home{min-height:calc(100vh - 40px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 16px calc(24px + env(safe-area-inset-bottom))}
+.home .brand{font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:28px}
+.start{width:min(78vw,340px);height:min(78vw,340px);border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);
+  font-size:clamp(38px,9vw,56px);font-weight:800;box-shadow:0 18px 40px rgba(37,99,235,.35);transition:transform .12s}
+.start:active{transform:scale(.97)}
+.today{margin-top:26px;font-size:20px;font-weight:600}
+.ramp{margin-top:6px;color:var(--warn);font-weight:600;font-size:15px}
+.home .links{margin-top:auto;padding-top:40px;font-size:15px}
+.linkbtn{background:none;border:0;color:var(--accent);text-decoration:underline;padding:8px}
+.foot{font-size:13px;color:var(--muted);text-align:center;margin-top:10px}
+
+/* Top bar */
+.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(8px + env(safe-area-inset-top)) 16px 8px;border-bottom:1px solid var(--line)}
+.top-in{max-width:980px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.x{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:20px;flex:none}
+.top .meta{flex:1;min-width:0}
+.top .row{display:flex;justify-content:space-between;font-size:14px;font-weight:600}
+.bar{height:8px;border-radius:8px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar>i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+
+/* Exercise screen */
+.ex{max-width:980px;margin:0 auto;padding:12px 16px calc(130px + env(safe-area-inset-bottom))}
+.ex h1{margin-top:6px}
+.rx{font-size:20px;font-weight:700}
+.rx .muted{font-weight:500;font-size:16px}
+.ss{background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.35);border-radius:12px;padding:10px 12px;margin:10px 0;font-size:15px}
+.anim{position:relative;background:var(--card);border:1px solid var(--line);border-radius:18px;margin:12px 0;overflow:hidden}
+.anim svg{display:block;width:100%;height:auto;max-height:46vh}
+.anim .pp{position:absolute;right:8px;bottom:8px;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);font-size:15px}
+.sets-head{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px}
+.sets-head b{font-size:18px}
+.sets{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;margin-top:8px}
+.set{display:flex;flex-direction:column;align-items:center;gap:6px}
+.box{width:100%;height:84px;border-radius:16px;border:3px solid var(--line);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;font-size:15px;transition:background .15s,border-color .15s}
+.box .ck{font-size:30px;line-height:1;height:32px}
+.box.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.box.next{border-color:var(--accent);box-shadow:0 0 0 4px rgba(37,99,235,.25)}
+.set input{width:72px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-align:center;font-size:16px}
+.cols{display:block}
+.mist li::marker{content:"✕  ";color:#dc2626}
+.cues li::marker{content:"✓  ";color:var(--ok)}
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--bg);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
+.bottom-in{max-width:980px;margin:0 auto;display:flex;gap:10px}
+.btn{height:60px;border-radius:16px;border:0;font-size:20px;font-weight:700;padding:0 18px}
+.btn.primary{flex:1;background:var(--accent);color:#fff}
+.btn.ghost{background:var(--card);border:1px solid var(--line);min-width:96px}
+.btn:disabled{opacity:.4}
+
+/* Rest overlay */
+.rest{position:fixed;inset:0;z-index:20;background:rgba(2,6,23,.82);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;backdrop-filter:blur(3px)}
+.rest.show{display:flex}
+.rest .lbl{font-size:18px;letter-spacing:.06em;text-transform:uppercase;opacity:.8}
+.rest .tm{font-size:clamp(88px,26vw,170px);font-weight:800;font-variant-numeric:tabular-nums;line-height:1;margin:10px 0}
+.rest .nx{font-size:18px;opacity:.9;max-width:520px}
+.rest .ring{width:min(70vw,320px);height:10px;border-radius:10px;background:rgba(255,255,255,.2);overflow:hidden;margin:18px 0 26px}
+.rest .ring>i{display:block;height:100%;background:#22c55e;width:100%}
+.rest .ctl{display:flex;gap:10px;width:100%;max-width:440px;justify-content:center}
+.rest .ctl button{flex:1}
+.rest .ctl button.skip{flex:1.6}
+.rest button{height:68px;min-width:0;padding:0 8px;border-radius:16px;border:0;font-size:20px;font-weight:700;background:rgba(255,255,255,.14);color:#fff}
+.rest button.skip{background:#2563eb;min-width:136px}
+
+/* Done */
+.done{text-align:center;padding-top:12vh}
+.done .big{font-size:72px}
+
+/* About */
+.day h2{display:flex;justify-content:space-between}
+.plan-list{list-style:none;padding:0;margin:0}
+.plan-list li>span{white-space:nowrap;flex:none}
+.plan-list li{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding:10px 0}
+.plan-list li:first-child{border-top:0}
+.plan-list a{font-weight:600;text-decoration:none}
+
+@media (min-width:768px){
+  .ex .cols{display:grid;grid-template-columns:1.05fr 1fr;gap:22px;align-items:start}
+  .about-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0 16px}
+  .about-grid .day:last-child{grid-column:1 / -1}
+  .wrap.about{max-width:900px}
+}
+@media (min-width:1024px){ .about-grid{grid-template-columns:repeat(3,1fr)} .about-grid .day:last-child{grid-column:auto} }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<div class="rest" id="rest" role="dialog" aria-live="polite" aria-label="Rest timer">
+  <div class="lbl">Rest</div>
+  <div class="tm" id="restTime">1:15</div>
+  <div class="ring"><i id="restBar"></i></div>
+  <div class="nx" id="restNext"></div>
+  <div style="height:22px"></div>
+  <div class="ctl">
+    <button id="restMinus" aria-label="15 seconds less">−15 s</button>
+    <button class="skip" id="restSkip">Skip</button>
+    <button id="restPlus" aria-label="15 seconds more">+15 s</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============ PLAN DATA (edit here) ============ */
+const EX = {
+  "goblet-squat": {name:"Goblet Squat", cues:["Hold one dumbbell vertically at your chest, elbows tucked.","Feet shoulder-width, toes slightly out.","Sit hips down and back between your heels; chest stays up.","Drive through the whole foot to stand tall."], mistakes:["Heels lifting off the floor","Knees caving inward","Rounding the lower back at the bottom"]},
+  "db-bench": {name:"Dumbbell Bench Press", note:"No bench? Do it lying on the floor (floor press).", cues:["Lie back, feet flat, shoulder blades squeezed together.","Start with dumbbells over your chest, arms straight.","Lower slowly until elbows are just below the bench, about 45° from your body.","Press up and slightly together."], mistakes:["Elbows flared straight out at 90°","Bouncing the weights off your chest","Lifting hips off the bench"]},
+  "one-arm-row": {name:"One-Arm Dumbbell Row", side:true, cues:["Brace one hand on a bench or sturdy surface; back flat.","Let the dumbbell hang straight down.","Pull your elbow back toward your hip.","Lower under control to a full stretch."], mistakes:["Twisting the torso to heave the weight","Shrugging toward the ear","Rounded back"]},
+  "rdl": {name:"Romanian Deadlift", cues:["Stand tall, dumbbells in front of thighs, soft knees.","Push hips straight back; dumbbells slide down close to legs.","Stop when you feel a strong hamstring stretch (about mid-shin).","Squeeze glutes to stand back up."], mistakes:["Rounding the back","Turning it into a squat (knees bending a lot)","Letting the weights drift away from your legs"]},
+  "db-curl": {name:"Dumbbell Curl", cues:["Stand tall, palms forward, elbows pinned at your sides.","Curl up until forearms are vertical.","Squeeze, then lower slowly (2–3 seconds).","Fully straighten at the bottom."], mistakes:["Swinging with the hips or back","Elbows drifting forward","Half reps"]},
+  "oh-triceps": {name:"Overhead Triceps Extension", cues:["Hold one dumbbell overhead with both hands.","Keep elbows pointing up and close to your head.","Lower the weight behind your head by bending only the elbows.","Straighten arms fully to the top."], mistakes:["Elbows flaring wide","Arching the lower back (brace your abs)","Moving the upper arms"]},
+  "reverse-lunge": {name:"Reverse Lunge", side:true, cues:["Stand tall with dumbbells at your sides.","Step one foot back and lower until both knees are about 90°.","Front shin stays mostly vertical; torso upright.","Push through the front heel to return."], mistakes:["Front knee caving inward","Slamming the back knee into the floor","Leaning far forward"]},
+  "oh-press": {name:"Dumbbell Shoulder Press", cues:["Stand (or sit) tall, dumbbells at shoulder height.","Brace abs and squeeze glutes.","Press straight up until arms are locked out overhead.","Lower under control back to the shoulders."], mistakes:["Leaning back / arching the lower back","Pressing forward instead of up","Partial range"]},
+  "bent-row": {name:"Bent-Over Dumbbell Row", cues:["Hinge forward about 45°, back flat, knees soft.","Arms hang straight down, palms facing in.","Row both elbows back toward your hips.","Squeeze shoulder blades, then lower slowly."], mistakes:["Standing up as you row","Rounding the back","Jerking the weights"]},
+  "glute-bridge": {name:"Dumbbell Glute Bridge", cues:["Lie on your back, knees bent, feet flat, dumbbell resting on hips.","Press through your heels and lift hips.","Finish with a straight line knees–hips–shoulders; squeeze glutes.","Lower slowly."], mistakes:["Over-arching the lower back at the top","Pushing through the toes","Rushing the reps"]},
+  "hammer-curl": {name:"Hammer Curl", cues:["Palms face each other (thumbs up) the whole time.","Elbows stay pinned at your sides.","Curl up, squeeze, lower slowly.","Fully straighten at the bottom."], mistakes:["Swinging the body","Elbows moving forward","Rushing the lowering"]},
+  "kickback": {name:"Triceps Kickback", cues:["Hinge forward, back flat, upper arms pinned alongside your body.","Start with elbows bent 90°.","Straighten your arms back until fully locked out.","Return slowly; upper arm stays still."], mistakes:["Upper arm dropping or swinging","Using momentum","Rounded back"]},
+  "split-squat": {name:"Bulgarian Split Squat", side:true, note:"Rear foot on a bench or couch; regular split squat if balance is tough.", cues:["Front foot about two feet ahead of the bench; rear laces down on the bench.","Lower straight down until the front thigh is about parallel.","Keep most weight on the front heel; torso tall or slightly forward.","Drive up through the front foot."], mistakes:["Front foot too close to the bench","Front knee caving in","Bouncing off the bottom"]},
+  "incline-press": {name:"Incline Dumbbell Press", note:"Set the bench at a low incline (about 30°).", cues:["Sit back on the incline, shoulder blades pinched.","Start with dumbbells at upper chest, elbows about 45°.","Press up over your upper chest.","Lower slowly to a comfortable stretch."], mistakes:["Bench set too steep (turns into a shoulder press)","Elbows flaring straight out","Bouncing at the bottom"]},
+  "reverse-fly": {name:"Reverse Fly", cues:["Hinge forward until your torso is nearly flat; back straight.","Arms hang down with a slight bend in the elbows.","Raise arms out to the sides to shoulder height, squeezing shoulder blades.","Lower slowly."], mistakes:["Going too heavy and swinging","Shrugging the shoulders","Bending elbows more as you lift"]},
+  "lateral-raise": {name:"Lateral Raise", cues:["Stand tall, dumbbells at your sides, slight bend in elbows.","Raise arms out to the sides to shoulder height.","Lead with the elbows; hands no higher than elbows.","Lower slowly over 2–3 seconds."], mistakes:["Swinging or shrugging","Lifting above shoulder height","Going too heavy"]}
+};
+const DAYS = {
+  A: [{id:"goblet-squat",sets:4,reps:"10–15"},{id:"db-bench",sets:4,reps:"8–12"},{id:"one-arm-row",sets:4,reps:"10–12"},{id:"rdl",sets:4,reps:"10–12"},{id:"db-curl",sets:3,reps:"10–15",ss:1},{id:"oh-triceps",sets:3,reps:"10–15",ss:2}],
+  B: [{id:"reverse-lunge",sets:4,reps:"8–12"},{id:"oh-press",sets:4,reps:"8–12"},{id:"bent-row",sets:4,reps:"10–12"},{id:"glute-bridge",sets:4,reps:"12–15"},{id:"hammer-curl",sets:3,reps:"10–15",ss:1},{id:"kickback",sets:3,reps:"10–15",ss:2}],
+  C: [{id:"split-squat",sets:4,reps:"8–12"},{id:"incline-press",sets:4,reps:"8–12"},{id:"reverse-fly",sets:4,reps:"12–15"},{id:"lateral-raise",sets:4,reps:"12–15"},{id:"db-curl",sets:3,reps:"10–15",ss:1},{id:"oh-triceps",sets:3,reps:"10–15",ss:2}]
+};
+const RULES = [
+  "Train 3 days a week on non-consecutive days, rotating Day A → B → C.",
+  "Rest 60–90 seconds between sets.",
+  "Stop each set with 1–2 reps left in the tank (good form the whole time).",
+  "First two weeks: do 2 sets of everything, then move to the full set count.",
+  "Progression: when you hit the top of the rep range on every set, go up one dumbbell size next time.",
+  "Maxed out at 35 lb dumbbells? Keep progressing by adding reps (up to ~20), slowing the lowering to 3–4 seconds, adding a 1–2 second pause at the hardest point, or doing one extra set."
+];
+const RAMP_DAYS = 14, RAMP_SETS = 2, DEFAULT_REST = 75;
+
+/* ============ ANIMATION POSES ============ */
+/* Side view, facing right. Angles in degrees: 0 = straight down, 90 = forward (right), 180 = up, -90 = back (left).
+   t torso (hip->shoulder), ua/fa near upper/fore arm, th/sh near thigh/shin; ...2 = far side. */
+const ANIM = {
+  "goblet-squat":{poses:[{t:180,ua:15,fa:165,th:0,sh:0},{t:148,ua:45,fa:172,th:88,sh:-32}],goblet:1},
+  "db-bench":{poses:[{hip:[118,136],t:-90,ua:180,fa:180,th:96,sh:-6},{hip:[118,136],t:-90,ua:50,fa:180,th:96,sh:-6}],props:[["bench",40,142,138]]},
+  "one-arm-row":{poses:[{t:102,ua:0,fa:0,ua2:12,fa2:0,th:12,sh:0,th2:-14,sh2:-8},{t:102,ua:-118,fa:-4,ua2:12,fa2:0,th:12,sh:0,th2:-14,sh2:-8}],props:[["block",150,140,30]],noFarDB:1},
+  "rdl":{poses:[{t:180,ua:6,fa:6,th:0,sh:0},{t:96,ua:-2,fa:-2,th:16,sh:-6}]},
+  "db-curl":{poses:[{t:180,ua:6,fa:8,th:0,sh:0},{t:180,ua:6,fa:158,th:0,sh:0}]},
+  "hammer-curl":{poses:[{t:180,ua:6,fa:8,th:0,sh:0},{t:180,ua:6,fa:158,th:0,sh:0}]},
+  "oh-triceps":{poses:[{t:180,ua:172,fa:-22,th:0,sh:0},{t:180,ua:172,fa:178,th:0,sh:0}],goblet:1},
+  "reverse-lunge":{poses:[{t:180,ua:6,fa:6,th:0,sh:0,th2:0,sh2:0},{t:178,ua:6,fa:6,th:82,sh:-4,th2:-22,sh2:-84,fd2:-170}]},
+  "oh-press":{poses:[{t:180,ua:16,fa:176,th:0,sh:0},{t:180,ua:176,fa:180,th:0,sh:0}]},
+  "bent-row":{poses:[{t:128,ua:0,fa:0,th:16,sh:-8},{t:128,ua:-72,fa:-2,th:16,sh:-8}]},
+  "glute-bridge":{poses:[{t:-90,ua:90,fa:90,th:140,sh:20},{t:-68,ua:96,fa:96,th:106,sh:2}],hipDB:1,noHandDB:1},
+  "kickback":{poses:[{t:112,ua:-74,fa:0,th:16,sh:-8},{t:112,ua:-74,fa:-76,th:16,sh:-8}]},
+  "split-squat":{poses:[{t:178,ua:6,fa:6,th:14,sh:0,fd2:-84},{t:170,ua:8,fa:8,th:80,sh:-10,fd2:-84}],props:[["block",30,132,30]],ax:132,fix2:[56,126]},
+  "incline-press":{poses:[{t:-148,ua:20,fa:172,th:90,sh:0},{t:-148,ua:170,fa:172,th:90,sh:0}],props:[["incline"]],ax:150},
+  "reverse-fly":{poses:[{t:100,ua:0,fa:8,th:14,sh:-6,as:1},{t:100,ua:60,fa:65,th:14,sh:-6,as:.38}]},
+  "lateral-raise":{view:"front",poses:[{la:8,eb:4},{la:86,eb:10}]}
+};
+
+/* ============ STORAGE ============ */
+const store = {
+  get(k){ try{ const v = localStorage.getItem(k); return v==null?null:JSON.parse(v); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+const pad = n => String(n).padStart(2,"0");
+function today(){ const d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function dayDiff(a,b){ const p=s=>{const [y,m,d]=s.split("-").map(Number);return Date.UTC(y,m-1,d);}; return Math.round((p(b)-p(a))/864e5); }
+function nextDay(){ const last=store.get("wfg:last"); return last ? ({A:"B",B:"C",C:"A"})[last.day]||"A" : "A"; }
+function rampActive(){ const f=store.get("wfg:firstStart"); return !f || dayDiff(f,today()) < RAMP_DAYS; }
+function restDefault(){ const r=store.get("wfg:rest"); return (typeof r==="number" && r>=15 && r<=300) ? r : DEFAULT_REST; }
+function current(){ const k=store.get("wfg:current"); if(!k) return null; const s=store.get(k); return s && !s.completed ? s : null; }
+function save(s){ store.set(s.key, s); }
+function startSession(){
+  let s=current(); if(s) return s;
+  if(!store.get("wfg:firstStart")) store.set("wfg:firstStart", today());
+  const day=nextDay(), date=today(), ramp=rampActive();
+  s={key:"wfg:session:"+day+":"+date, day, date, ramp, idx:0, startedAt:Date.now(),
+     sets:DAYS[day].map(it=>Array.from({length: ramp?Math.min(RAMP_SETS,it.sets):it.sets},()=>({d:false,r:""})))};
+  save(s); store.set("wfg:current", s.key); return s;
+}
+function counts(s){ let d=0,t=0; s.sets.forEach(a=>a.forEach(x=>{t++; if(x.d)d++;})); return {d,t}; }
+function finish(s){
+  cancelRest(false);
+  const c=counts(s); s.completed=true; s.completedAt=Date.now(); save(s);
+  store.set("wfg:last",{day:s.day,date:s.date,done:c.d,total:c.t});
+  const h=store.get("wfg:history")||[]; h.push({day:s.day,date:s.date,done:c.d,total:c.t}); store.set("wfg:history",h.slice(-200));
+  store.del("wfg:current");
+  go("#/done");
+}
+
+/* ============ AUDIO (unlocked on first tap) ============ */
+let actx=null;
+function unlockAudio(){
+  try{
+    if(!actx){ const C=window.AudioContext||window.webkitAudioContext; if(C) actx=new C(); }
+    if(actx && actx.state==="suspended") actx.resume();
+    if(actx && !actx._primed){ const o=actx.createOscillator(),g=actx.createGain(); g.gain.value=0.0001; o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime+0.02); actx._primed=true; }
+  }catch(e){}
+}
+function beep(){
+  try{
+    if(actx){ if(actx.state==="suspended") actx.resume();
+      [0,0.22].forEach(off=>{ const o=actx.createOscillator(),g=actx.createGain(); o.type="sine"; o.frequency.value=880;
+        const t0=actx.currentTime+off; g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(0.35,t0+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t0+0.18);
+        o.connect(g).connect(actx.destination); o.start(t0); o.stop(t0+0.2); });
+    }
+  }catch(e){}
+  try{ if(navigator.vibrate) navigator.vibrate([180,80,180]); }catch(e){}
+  window.__beeps=(window.__beeps||0)+1;
+}
+document.addEventListener("pointerdown", unlockAudio, {passive:true});
+document.addEventListener("touchend", unlockAudio, {passive:true});
+
+/* ============ FLOW LOGIC ============ */
+function nextUnchecked(s,i){ return s.sets[i].findIndex(x=>!x.d); }
+/* Where to go after set j of exercise i is checked. Returns {type:'set'|'ex'|'done', i, rest:boolean} */
+function planAfterCheck(s,i){
+  const items=DAYS[s.day], it=items[i];
+  if(it.ss===1){ // first half of superset: straight to partner, no rest
+    if(nextUnchecked(s,i+1)>=0) return {type:"ex",i:i+1,rest:false};
+    if(nextUnchecked(s,i)>=0) return {type:"set",i,rest:true};
+  }
+  if(it.ss===2){ // second half: rest, then back to partner if it still has sets
+    if(nextUnchecked(s,i-1)>=0) return {type:"ex",i:i-1,rest:true};
+  }
+  if(nextUnchecked(s,i)>=0) return {type:"set",i,rest:true};
+  // exercise complete
+  if(i+1<items.length) return {type:"ex",i:i+1,rest:true};
+  return {type:"done",rest:false};
+}
+function applyTarget(s,tg){
+  if(tg.type==="done"){ finish(s); return; }
+  if(s.idx!==tg.i){ s.idx=tg.i; save(s); }
+  if(location.hash!=="#/go") go("#/go"); else render();
+  window.scrollTo(0,0);
+}
+
+/* ============ REST TIMER (timestamp based) ============ */
+let restTick=null;
+const $=id=>document.getElementById(id);
+function fmt(sec){ sec=Math.max(0,Math.ceil(sec)); return Math.floor(sec/60)+":"+pad(sec%60); }
+function startRest(s,tg,label){
+  const dur=restDefault();
+  s.rest={end:Date.now()+dur*1000,total:dur,tg,label}; save(s);
+  showRest();
+}
+function showRest(){
+  const s=current(); if(!s||!s.rest){ hideRest(); return; }
+  $("rest").classList.add("show"); $("restNext").textContent=s.rest.label||"";
+  clearInterval(restTick); restTick=setInterval(updateRest,200); updateRest();
+}
+function hideRest(){ $("rest").classList.remove("show"); clearInterval(restTick); restTick=null; }
+function updateRest(){
+  const s=current(); if(!s||!s.rest){ hideRest(); return; }
+  const left=(s.rest.end-Date.now())/1000;
+  $("restTime").textContent=fmt(left);
+  $("restBar").style.width=Math.max(0,Math.min(100,left/s.rest.total*100))+"%";
+  if(left<=0) endRest(true);
+}
+function endRest(withBeep){
+  const s=current(); if(!s||!s.rest){ hideRest(); return; }
+  const tg=s.rest.tg; delete s.rest; save(s); hideRest();
+  if(withBeep) beep();
+  applyTarget(s,tg);
+}
+function cancelRest(rerender){ const s=current(); if(s&&s.rest){ delete s.rest; save(s);} hideRest(); if(rerender) render(); }
+function adjustRest(delta){
+  const s=current(); if(!s||!s.rest) return;
+  const nd=Math.max(15,Math.min(300,restDefault()+delta)); store.set("wfg:rest",nd);
+  s.rest.end+=delta*1000; s.rest.total=Math.max(15,s.rest.total+delta); save(s); updateRest();
+}
+$("restSkip").onclick=()=>endRest(false);
+$("restMinus").onclick=()=>adjustRest(-15);
+$("restPlus").onclick=()=>adjustRest(15);
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) updateRest(); });
+window.addEventListener("focus",updateRest);
+window.addEventListener("pageshow",updateRest);
+
+/* ============ FIGURE RENDERER ============ */
+const SVGNS="http://www.w3.org/2000/svg";
+const L={t:50,ua:27,fa:25,th:38,sh:38,ft:13,hr:10};
+const R=Math.PI/180, dir=(a,len)=>[Math.sin(a*R)*len,Math.cos(a*R)*len];
+const add=(p,v)=>[p[0]+v[0],p[1]+v[1]];
+const GROUND=176, ANK=170;
+function fk(p,anim){
+  const g=k=>p[k]; const f=(k,d)=>p[k]!=null?p[k]:p[d];
+  const as=p.as!=null?p.as:1;
+  const kn=dir(g("th"),L.th), an=add(kn,dir(g("sh"),L.sh));
+  let hip;
+  if(p.hip) hip=p.hip.slice(); else { const ax=anim.ax||104; hip=[ax-an[0],ANK-an[1]]; }
+  const knee=add(hip,kn), ank=add(knee,dir(g("sh"),L.sh));
+  let knee2, ank2;
+  if(anim.fix2){ // 2-bone IK: far foot stays planted at anim.fix2
+    const T=anim.fix2, dx=T[0]-hip[0], dy=T[1]-hip[1]; let d=Math.hypot(dx,dy); const a=L.th; d=Math.min(d,2*a-0.01);
+    const m=[hip[0]+dx/2,hip[1]+dy/2], h=Math.sqrt(a*a-(d/2)*(d/2)), n=[-dy/Math.hypot(dx,dy),dx/Math.hypot(dx,dy)];
+    const c1=[m[0]+n[0]*h,m[1]+n[1]*h], c2=[m[0]-n[0]*h,m[1]-n[1]*h];
+    knee2=c1[1]>c2[1]?c1:c2; ank2=T.slice();
+  } else { knee2=add(hip,dir(f("th2","th"),L.th)); ank2=add(knee2,dir(f("sh2","sh"),L.sh)); }
+  const toe=add(ank,dir(p.fd!=null?p.fd:90,L.ft)), toe2=add(ank2,dir(p.fd2!=null?p.fd2:90,L.ft));
+  const sh=add(hip,dir(g("t"),L.t)), head=add(hip,dir(g("t"),L.t+L.hr+4));
+  const el=add(sh,dir(g("ua"),L.ua*as)), hd=add(el,dir(g("fa"),L.fa*as));
+  const el2=add(sh,dir(f("ua2","ua"),L.ua*as)), hd2=add(el2,dir(f("fa2","fa"),L.fa*as));
+  return {hip,knee,ank,toe,knee2,ank2,toe2,sh,head,el,hd,el2,hd2};
+}
+function lerpPose(a,b,u){ const o={}; for(const k in a){ const va=a[k], vb=b[k]; if(Array.isArray(va)) o[k]=va.map((x,i)=>x+(vb[i]-x)*u); else if(typeof va==="number" && typeof vb==="number") o[k]=va+(vb-va)*u; else o[k]=va; } return o; }
+function el(tag,attrs,parent){ const e=document.createElementNS(SVGNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
+function line(parent,cls){ return el("line",{class:cls,"stroke-linecap":"round"},parent); }
+function setLine(l,a,b){ l.setAttribute("x1",a[0].toFixed(1)); l.setAttribute("y1",a[1].toFixed(1)); l.setAttribute("x2",b[0].toFixed(1)); l.setAttribute("y2",b[1].toFixed(1)); }
+function setC(c,p){ c.setAttribute("cx",p[0].toFixed(1)); c.setAttribute("cy",p[1].toFixed(1)); }
+
+let animState=null;
+function mountFigure(container,id){
+  const anim=ANIM[id]; container.innerHTML="";
+  const svg=el("svg",{viewBox:"0 0 220 190",role:"img","aria-label":EX[id].name+" demonstration"},container);
+  const st=el("style",{},svg);
+  st.textContent=".far{stroke:var(--far);stroke-width:7}.near{stroke:var(--near);stroke-width:8}.prop{fill:var(--prop)}.gnd{stroke:var(--line);stroke-width:3}.db{fill:#64748b}.dbn{fill:#334155}@media (prefers-color-scheme:dark){.dbn{fill:#cbd5e1}.db{fill:#7c8aa3}}";
+  setLine(line(svg,"gnd"),[6,GROUND+1],[214,GROUND+1]);
+  (anim.props||[]).forEach(pr=>{
+    if(pr[0]==="bench"){ el("rect",{class:"prop",x:pr[1],y:pr[2],width:pr[3]-pr[1]+40,height:7,rx:3},svg); el("rect",{class:"prop",x:pr[1]+10,y:pr[2]+7,width:6,height:GROUND-pr[2]-7},svg); el("rect",{class:"prop",x:pr[3]+14,y:pr[2]+7,width:6,height:GROUND-pr[2]-7},svg); }
+    if(pr[0]==="block"){ el("rect",{class:"prop",x:pr[1],y:pr[2],width:pr[3],height:GROUND-pr[2],rx:3},svg); }
+  });
+  const parts={};
+  if(anim.view==="front"){
+    parts.legs=[line(svg,"near"),line(svg,"near"),line(svg,"near"),line(svg,"near")];
+    parts.torso=line(svg,"near"); parts.shoulders=line(svg,"near"); parts.hips=line(svg,"near");
+    parts.arms=[line(svg,"near"),line(svg,"near"),line(svg,"near"),line(svg,"near")];
+    parts.head=el("circle",{r:L.hr,fill:"var(--near)"},svg);
+    parts.dbs=[el("rect",{class:"dbn",width:16,height:8,rx:2},svg),el("rect",{class:"dbn",width:16,height:8,rx:2},svg)];
+  } else {
+    if(anim.props&&anim.props.some(p=>p[0]==="incline")) parts.incline=el("polygon",{class:"prop"},svg);
+    parts.farLeg=[line(svg,"far"),line(svg,"far"),line(svg,"far")];
+    parts.farArm=[line(svg,"far"),line(svg,"far")];
+    parts.farDB=anim.noFarDB||anim.noHandDB||anim.goblet?null:el("circle",{class:"db",r:6.5},svg);
+    parts.torso=line(svg,"near"); parts.head=el("circle",{r:L.hr,fill:"var(--near)"},svg);
+    parts.nearLeg=[line(svg,"near"),line(svg,"near"),line(svg,"near")];
+    parts.hipDB=anim.hipDB?el("circle",{class:"dbn",r:7},svg):null;
+    parts.nearArm=[line(svg,"near"),line(svg,"near")];
+    parts.nearDB=anim.noHandDB?null:el("circle",{class:"dbn",r:anim.goblet?8:6.5},svg);
+  }
+  const btn=document.createElement("button"); btn.className="pp"; btn.setAttribute("aria-label","Pause or play animation");
+  container.appendChild(btn);
+  const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  animState={id,anim,parts,svg,t0:performance.now(),playing:!reduce,frozenU:reduce?1:null};
+  btn.textContent=animState.playing?"❚❚":"▶";
+  btn.onclick=()=>{ animState.playing=!animState.playing; btn.textContent=animState.playing?"❚❚":"▶"; if(animState.playing) animState.t0=performance.now()-(animState.lastT||0); };
+  drawFrame(reduce?1:0);
+}
+function phaseU(ms){ const T=2800, x=(ms%T)/T; const e=v=>0.5-0.5*Math.cos(Math.PI*v);
+  if(x<0.4) return e(x/0.4); if(x<0.5) return 1; if(x<0.9) return 1-e((x-0.5)/0.4); return 0; }
+function drawFrame(u){
+  const A=animState; if(!A) return; const P=A.parts, an=A.anim;
+  const p=lerpPose(an.poses[0],an.poses[1],u);
+  if(an.view==="front"){
+    const cx=110, shY=70, hipY=118;
+    const sL=[cx-17,shY], sR=[cx+17,shY], hL=[cx-9,hipY], hR=[cx+9,hipY];
+    setLine(P.torso,[cx,shY-4],[cx,hipY]); setLine(P.shoulders,sL,sR); setLine(P.hips,hL,hR); setC(P.head,[cx,shY-20]);
+    const kL=[cx-10,hipY+27],kR=[cx+10,hipY+27],aL=[cx-11,ANK],aR=[cx+11,ANK];
+    setLine(P.legs[0],hL,kL); setLine(P.legs[1],kL,aL); setLine(P.legs[2],hR,kR); setLine(P.legs[3],kR,aR);
+    const eL=add(sL,dir(-p.la,L.ua)), wL=add(eL,dir(-p.la+p.eb,L.fa)), eR=add(sR,dir(p.la,L.ua)), wR=add(eR,dir(p.la-p.eb,L.fa));
+    setLine(P.arms[0],sL,eL); setLine(P.arms[1],eL,wL); setLine(P.arms[2],sR,eR); setLine(P.arms[3],eR,wR);
+    P.dbs[0].setAttribute("x",(wL[0]-8).toFixed(1)); P.dbs[0].setAttribute("y",(wL[1]-4).toFixed(1));
+    P.dbs[1].setAttribute("x",(wR[0]-8).toFixed(1)); P.dbs[1].setAttribute("y",(wR[1]-4).toFixed(1));
+    return;
+  }
+  const k=fk(p,an);
+  if(P.incline){ const h=k.hip, b=add(h,dir(p.t,L.t+6)); const off=dir(p.t-90,9);
+    P.incline.setAttribute("points",[add(h,[-4,8]),add(b,off),add(b,[off[0]*0.2,off[1]*0.2+0]),add(h,[22,4]),add(h,[22,12]),[h[0]+12,GROUND],[h[0]+4,GROUND],add(h,[-4,12])].map(q=>q.map(v=>v.toFixed(1)).join(",")).join(" ")); }
+  setLine(P.farLeg[0],k.hip,k.knee2); setLine(P.farLeg[1],k.knee2,k.ank2); setLine(P.farLeg[2],k.ank2,k.toe2);
+  setLine(P.farArm[0],k.sh,k.el2); setLine(P.farArm[1],k.el2,k.hd2); if(P.farDB) setC(P.farDB,k.hd2);
+  setLine(P.torso,k.hip,k.sh); setC(P.head,k.head);
+  setLine(P.nearLeg[0],k.hip,k.knee); setLine(P.nearLeg[1],k.knee,k.ank); setLine(P.nearLeg[2],k.ank,k.toe);
+  if(P.hipDB) setC(P.hipDB,add(k.hip,dir(p.t+180,-2).map((v,i)=>i?v-9:v)));
+  setLine(P.nearArm[0],k.sh,k.el); setLine(P.nearArm[1],k.el,k.hd); if(P.nearDB) setC(P.nearDB,k.hd);
+}
+function loop(now){
+  if(animState && animState.playing && animState.svg.isConnected){ const t=now-animState.t0; animState.lastT=t; drawFrame(phaseU(t)); }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ============ VIEWS ============ */
+const app=$("app");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function go(h){ if(location.hash===h) render(); else location.hash=h; }
+const FOOT='<p class="foot">General fitness information, not medical advice. Stop if anything hurts.</p>';
+
+function viewHome(){
+  const s=current(); const day=s?s.day:nextDay(); const n=DAYS[day].length;
+  const ramp=s?s.ramp:rampActive();
+  let line2="Today: Day "+day+" · "+n+" exercises";
+  if(s){ const c=counts(s); line2+=" · "+c.d+" of "+c.t+" sets done"; }
+  app.innerHTML='<div class="home">'+
+    '<div class="brand">Workout Form Guide</div>'+
+    '<button class="start" id="startBtn">'+(s?"Resume":"Start")+'</button>'+
+    '<div class="today" id="todayLine">'+esc(line2)+'</div>'+
+    (ramp?'<div class="ramp" id="rampLine">Weeks 1–2: 2 sets</div>':'')+
+    (s?'<button class="linkbtn small" id="restartBtn">Start this workout over</button>':'')+
+    '<div class="links"><a href="#/about" id="aboutLink">About the plan</a>'+FOOT+'</div></div>';
+  $("startBtn").onclick=()=>{ unlockAudio(); startSession(); go("#/go"); };
+  if(s) $("restartBtn").onclick=()=>{ if(confirm("Clear today's checked sets and start this workout over?")){ cancelRest(false); store.del(s.key); store.del("wfg:current"); render(); } };
+}
+
+function exBody(id,it,s,i){
+  const ex=EX[id]; const items=s?DAYS[s.day]:null;
+  let ssNote="";
+  if(it&&it.ss){ const partner=EX[items[it.ss===1?i+1:i-1].id].name;
+    ssNote='<div class="ss" id="ssNote"><b>Superset</b> with '+esc(partner)+': do a set here, then go straight to '+(it.ss===1?"the next screen":"the previous screen")+'. No rest between them — rest '+'after the triceps set.</div>'; }
+  const rx = it ? '<div class="rx">'+(s?s.sets[i].length:it.sets)+' × '+esc(it.reps)+(ex.side?' <span class="muted">each side</span>':'')+' <span class="muted">· rest 60–90 s</span></div>' : '';
+  let setsHtml="";
+  if(s){
+    const arr=s.sets[i], nu=nextUnchecked(s,i), dn=arr.filter(x=>x.d).length;
+    setsHtml='<div class="sets-head"><b>Sets</b><span id="setCount" class="muted">'+dn+'/'+arr.length+' sets</span></div><div class="sets">'+
+      arr.map((x,j)=>'<div class="set"><button class="box'+(x.d?' on':'')+(j===nu?' next':'')+'" data-set="'+j+'" aria-pressed="'+x.d+'" aria-label="Set '+(j+1)+'"><span class="ck">'+(x.d?'✓':'')+'</span>Set '+(j+1)+'</button>'+
+        '<input type="number" inputmode="numeric" min="0" max="99" placeholder="reps" aria-label="Reps done set '+(j+1)+'" data-reps="'+j+'" value="'+esc(x.r)+'"></div>').join("")+'</div>';
+  }
+  return '<h1>'+esc(ex.name)+'</h1>'+rx+ssNote+(ex.note?'<p class="muted small" style="margin:6px 0 0">'+esc(ex.note)+'</p>':'')+
+    '<div class="cols"><div><div class="anim" id="anim"></div>'+setsHtml+'</div>'+
+    '<div><div class="card"><h2>Form cues</h2><ul class="cues">'+ex.cues.map(c=>'<li>'+esc(c)+'</li>').join("")+'</ul></div>'+
+    '<div class="card"><h2>Common mistakes</h2><ul class="mist">'+ex.mistakes.map(c=>'<li>'+esc(c)+'</li>').join("")+'</ul></div></div></div>';
+}
+
+function viewWorkout(){
+  const s=current(); if(!s){ go("#/"); return; }
+  const items=DAYS[s.day]; const i=Math.min(s.idx,items.length-1); const it=items[i]; const c=counts(s);
+  app.innerHTML='<div class="top"><div class="top-in"><button class="x" id="homeBtn" aria-label="Home">✕</button><div class="meta">'+
+    '<div class="row"><span id="exPos">Day '+s.day+' · Exercise '+(i+1)+' of '+items.length+'</span><span id="dayProg">'+c.d+' of '+c.t+' sets</span></div>'+
+    '<div class="bar"><i id="dayBar" style="width:'+(c.t?c.d/c.t*100:0)+'%"></i></div></div></div></div>'+
+    '<div class="ex">'+exBody(it.id,it,s,i)+FOOT+'</div>'+
+    '<div class="bottom"><div class="bottom-in"><button class="btn ghost" id="backBtn"'+(i===0?' disabled':'')+'>Back</button>'+
+    '<button class="btn primary" id="nextBtn">'+(i===items.length-1?'Finish':'Next')+'</button></div></div>';
+  mountFigure($("anim"),it.id);
+  $("homeBtn").onclick=()=>go("#/");
+  $("backBtn").onclick=()=>{ cancelRest(false); s.idx=Math.max(0,i-1); save(s); render(); window.scrollTo(0,0); };
+  $("nextBtn").onclick=()=>{ cancelRest(false); if(i===items.length-1){ finish(s); return; } s.idx=i+1; save(s); render(); window.scrollTo(0,0); };
+  app.querySelectorAll("[data-set]").forEach(b=>b.onclick=()=>{
+    unlockAudio();
+    const j=+b.dataset.set, ss=current(); if(!ss) return; const x=ss.sets[i][j];
+    x.d=!x.d; save(ss);
+    if(!x.d){ cancelRest(true); return; }        // unchecking cancels its timer
+    if(ss.rest){ delete ss.rest; save(ss); }      // a new check replaces any running timer
+    const tg=planAfterCheck(ss,i);
+    if(!tg.rest){ applyTarget(ss,tg); return; }
+    render();
+    let label;
+    if(tg.type==="set") label="Next: "+EX[items[tg.i].id].name+" — set "+(nextUnchecked(ss,tg.i)+1);
+    else label="Next: "+EX[items[tg.i].id].name+(items[tg.i].ss&&tg.i<i?" — next round":"");
+    startRest(ss,tg,label);
+  });
+  app.querySelectorAll("[data-reps]").forEach(inp=>inp.oninput=()=>{ const ss=current(); if(!ss) return; ss.sets[i][+inp.dataset.reps].r=inp.value.slice(0,3); save(ss); });
+  if(s.rest) showRest();
+}
+
+function viewDone(){
+  const last=store.get("wfg:last");
+  if(!last){ go("#/"); return; }
+  app.innerHTML='<div class="wrap done"><div class="big">✅</div><h1 id="doneTitle">Day '+last.day+' done — '+last.done+' of '+last.total+' sets</h1>'+
+    '<p class="muted">Next time: Day '+nextDay()+'</p><div style="height:20px"></div>'+
+    '<button class="btn primary" id="homeBtn" style="width:100%;max-width:360px">Back to home</button>'+
+    '<p style="margin-top:28px"><a href="#/about">About the plan</a></p>'+FOOT+'</div>';
+  $("homeBtn").onclick=()=>go("#/");
+}
+
+function viewAbout(){
+  const ramp=rampActive();
+  app.innerHTML='<div class="wrap about"><p><a href="#/" id="backHome">← Home</a></p><h1>About the plan</h1>'+
+    '<p class="muted">3-day full-body dumbbell plan. Tap any exercise to see its form guide.'+(ramp?' <b>You are in weeks 1–2: 2 sets of everything.</b>':'')+'</p>'+
+    '<div class="about-grid">'+Object.keys(DAYS).map(d=>'<div class="card day"><h2><span>Day '+d+'</span><span class="muted small">'+DAYS[d].reduce((a,x)=>a+x.sets,0)+' sets</span></h2><ul class="plan-list">'+
+      DAYS[d].map(it=>'<li><a href="#/ex/'+it.id+'">'+esc(EX[it.id].name)+(it.ss?' <span class="muted small">(superset)</span>':'')+'</a><span class="muted">'+it.sets+' × '+esc(it.reps)+(EX[it.id].side?' /side':'')+'</span></li>').join("")+'</ul></div>').join("")+'</div>'+
+    '<div class="card"><h2>Rules</h2><ul>'+RULES.map(r=>'<li>'+esc(r)+'</li>').join("")+'</ul></div>'+FOOT+'</div>';
+}
+
+function viewExercise(id){
+  if(!EX[id]){ go("#/about"); return; }
+  let it=null; for(const d in DAYS){ const f=DAYS[d].find(x=>x.id===id); if(f){ it=f; break; } }
+  app.innerHTML='<div class="ex"><p><a href="#/about">← About the plan</a></p>'+exBody(id,it?{...it,ss:0}:null,null,0)+FOOT+'</div>';
+  mountFigure($("anim"),id);
+}
+
+function render(){
+  const h=location.hash||"#/";
+  if(h!=="#/go") hideRest();
+  if(h==="#/go") viewWorkout();
+  else if(h==="#/done") viewDone();
+  else if(h==="#/about") viewAbout();
+  else if(h.startsWith("#/ex/")) viewExercise(decodeURIComponent(h.slice(5)));
+  else { animState=null; viewHome(); }
+  if(!h.startsWith("#/go")&&!h.startsWith("#/ex")) animState=animState&&animState.svg.isConnected?animState:null;
+}
+window.addEventListener("hashchange",()=>{ render(); window.scrollTo(0,0); });
+render();
+</script>
+</body>
+</html>
