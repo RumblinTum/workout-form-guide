@@ -39,6 +39,24 @@ li{margin:4px 0}
 .today{margin-top:26px;font-size:20px;font-weight:600}
 .ramp{margin-top:6px;color:var(--warn);font-weight:600;font-size:15px}
 .home .links{margin-top:auto;padding-top:40px;font-size:15px}
+.pill{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px;margin:0 0 6px}
+.pill button{min-width:112px;height:48px;border:0;border-radius:999px;background:none;font-weight:700;font-size:18px;color:var(--ink)}
+.pill button.on{background:var(--accent);color:#fff}
+.pill.locked button:not(.on){opacity:.4;cursor:default}
+.modehint{font-size:14px;color:var(--muted);min-height:20px;margin:0 0 18px}
+.start.off{background:var(--line);color:var(--muted);box-shadow:none;cursor:default}
+.pickhint{margin-top:14px;color:var(--muted);font-weight:600;font-size:16px}
+.pickhint.nudge{animation:nudge .35s;color:var(--warn)}
+@keyframes nudge{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tag{display:inline-block;border-radius:10px;padding:4px 10px;font-weight:600;font-size:14px}
+.tag.kb{background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.5)}
+.tag.fail{background:rgba(220,38,38,.09);border:1px solid rgba(220,38,38,.35)}
+.wt{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 10px}
+.wt label{font-weight:700;font-size:16px}
+.wt input{width:104px;height:48px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:20px;font-weight:700;text-align:center}
+.wt .hint{font-size:14px;color:var(--muted)}
+h2.sec{font-size:22px;margin:22px 0 2px}
 .linkbtn{background:none;border:0;color:var(--accent);text-decoration:underline;padding:8px}
 .foot{font-size:13px;color:var(--muted);text-align:center;margin-top:10px}
 
@@ -137,75 +155,157 @@ li{margin:4px 0}
 <script>
 "use strict";
 /* ============ PLAN DATA (edit here) ============ */
+/* bw: no weight field; wLabel: custom weight label */
 const EX = {
-  "goblet-squat": {name:"Goblet Squat", cues:["Hold one dumbbell vertically at your chest, elbows tucked.","Feet shoulder-width, toes slightly out.","Take a slow 3 seconds to sit hips down and back between your heels; chest stays up.","Drive through the whole foot to stand tall."], mistakes:["Dropping fast instead of a 3-second lowering","Heels lifting off the floor","Knees caving inward"]},
-  "goblet-squat-pause": {name:"Paused Goblet Squat", cues:["Hold one dumbbell vertically at your chest, elbows tucked.","Sit down between your heels, chest up.","Hold the bottom for a full 2 seconds, staying tight.","Drive up through the whole foot."], mistakes:["Relaxing or bouncing out of the pause","Heels lifting off the floor","Knees caving inward"]},
+  "goblet-squat": {name:"Goblet Squat", note:"Holding the kettlebell by the horns works best.", cues:["Hold the kettlebell (or one dumbbell) at your chest, elbows tucked.","Feet shoulder-width, toes slightly out.","Take a slow 3 seconds to sit hips down and back between your heels; chest stays up.","Drive through the whole foot to stand tall."], mistakes:["Dropping fast instead of a 3-second lowering","Heels lifting off the floor","Knees caving inward"]},
+  "goblet-squat-pause": {name:"Paused Goblet Squat", note:"Holding the kettlebell by the horns works best.", cues:["Hold the kettlebell (or one dumbbell) at your chest, elbows tucked.","Sit down between your heels, chest up.","Hold the bottom for a full 2 seconds, staying tight.","Drive up through the whole foot."], mistakes:["Relaxing or bouncing out of the pause","Heels lifting off the floor","Knees caving inward"]},
   "db-bench": {name:"Dumbbell Bench Press", note:"No bench? Do it lying on the floor (floor press).", cues:["Lie back, feet flat, shoulder blades squeezed together.","Start with dumbbells over your chest, arms straight.","Lower slowly until elbows are just below the bench, about 45° from your body.","Press up and slightly together."], mistakes:["Elbows flared straight out at 90°","Bouncing the weights off your chest","Lifting hips off the bench"]},
+  "db-floor-press": {name:"Dumbbell Floor Press", cues:["Lie on the floor, knees bent, feet flat.","Start with dumbbells over your chest, arms straight.","Lower until your upper arms lightly touch the floor, elbows about 45° from your body.","Pause for a beat, then press back up."], mistakes:["Slamming the elbows into the floor","Elbows flared straight out","Wrists bent back"]},
   "one-arm-row": {name:"One-Arm Dumbbell Row", cues:["Brace one hand on a bench or sturdy surface; back flat.","Let the dumbbell hang straight down.","Pull your elbow back toward your hip.","Lower under control to a full stretch."], mistakes:["Twisting the torso to heave the weight","Shrugging toward the ear","Rounded back"]},
   "rdl": {name:"Dumbbell Romanian Deadlift", cues:["Stand tall, dumbbells in front of thighs, soft knees.","Hip hinge: push hips straight back; dumbbells slide down close to your legs.","Keep a flat back; stop at a strong hamstring stretch (about mid-shin).","Squeeze glutes to stand back up."], mistakes:["Rounding the back","Turning it into a squat (knees bending a lot)","Letting the weights drift away from your legs"]},
   "lateral-raise": {name:"Lateral Raise", cues:["Stand tall, dumbbells at your sides, slight bend in elbows.","Raise arms out to the sides to shoulder height.","Lead with the elbows; hands no higher than elbows.","Lower slowly over 2–3 seconds."], mistakes:["Swinging or shrugging","Lifting above shoulder height","Going too heavy"]},
-  "plank": {name:"Plank", cues:["Forearms on the floor, elbows under shoulders.","Straight line from head to heels; squeeze glutes and brace abs.","Tuck ribs down slightly and look at the floor.","Breathe steadily through the hold."], mistakes:["Hips sagging","Hips piked up high","Holding your breath"]},
-  "split-squat": {name:"Split Squat or Reverse Lunge", note:"Either one. Split squat keeps both feet planted; reverse lunge steps back each rep.", cues:["Long staggered stance, dumbbells at your sides, torso tall.","Lower straight down until the back knee nearly touches the floor.","Front shin stays about vertical; weight in the front heel.","Drive through the front foot to rise."], mistakes:["Stance too short (front heel lifts)","Front knee caving in","Leaning far forward"]},
+  "plank": {name:"Plank", bw:1, cues:["Forearms on the floor, elbows under shoulders.","Straight line from head to heels; squeeze glutes and brace abs.","Tuck ribs down slightly and look at the floor.","Breathe steadily through the hold."], mistakes:["Hips sagging","Hips piked up high","Holding your breath"]},
+  "split-squat": {name:"Split Squat", cues:["Long staggered stance, dumbbells at your sides, torso tall.","Lower straight down until the back knee nearly touches the floor.","Front shin stays about vertical; weight in the front heel.","Drive through the front foot to rise."], mistakes:["Stance too short (front heel lifts)","Front knee caving in","Leaning far forward"]},
   "seated-oh-press": {name:"Seated Dumbbell Overhead Press", cues:["Sit on a bench (back pad upright if you have one), feet planted.","Dumbbells at shoulder height, wrists stacked over elbows.","Brace and press straight up until arms lock out overhead.","Lower under control back to shoulder height."], mistakes:["Arching the lower back off the pad","Pressing forward instead of straight up","Half reps"]},
   "chest-supported-row": {name:"Chest-Supported Incline Row", note:"Lie face down on a bench set to an incline (about 30–45°).", cues:["Chest on the pad, feet on the floor, arms hanging straight down.","Row both elbows back toward your hips.","Squeeze shoulder blades together for a beat at the top.","Lower slowly to a full stretch."], mistakes:["Lifting your chest off the pad to heave","Shrugging toward the ears","Cutting the stretch short"]},
-  "sl-rdl": {name:"Single-Leg RDL or Hip Thrust", note:"Do either. Shown: single-leg RDL. Hip thrust: upper back on a bench, dumbbell on hips, drive hips up to a straight line, chin tucked.", cues:["Hold the dumbbell in the hand opposite your standing leg.","Soft knee on the standing leg; hinge at the hip.","Back leg rises as your chest lowers: one straight line from head to heel.","Keep hips square to the floor; squeeze the glute to stand."], mistakes:["Rounding the back","Hip rotating open toward the ceiling","Locking the standing knee"]},
+  "sl-rdl": {name:"Single-Leg Romanian Deadlift", note:"Hold the kettlebell in the hand opposite your standing leg.", cues:["Kettlebell in the hand opposite your standing leg.","Soft knee on the standing leg; hinge at the hip.","Back leg rises as your chest lowers: one straight line from head to heel.","Keep hips square to the floor; squeeze the glute to stand."], mistakes:["Rounding the back","Hip rotating open toward the ceiling","Locking the standing knee"]},
   "db-curl": {name:"Dumbbell Curl", cues:["Stand tall, palms forward, elbows pinned at your sides.","Curl up until forearms are vertical.","Squeeze, then lower slowly (2–3 seconds).","Fully straighten at the bottom."], mistakes:["Swinging with the hips or back","Elbows drifting forward","Half reps"]},
   "oh-triceps": {name:"Overhead Triceps Extension", cues:["Hold one dumbbell overhead with both hands.","Keep elbows pointing up and close to your head.","Lower the weight behind your head by bending only the elbows.","Straighten arms fully to the top."], mistakes:["Elbows flaring wide","Arching the lower back (brace your abs)","Moving the upper arms"]},
-  "farmer-carry": {name:"Farmer Carry", cues:["Pick up your heaviest dumbbells with a flat back.","Stand tall, shoulders back and down, arms straight.","Walk with short, controlled steps; brace your abs.","Set them down with a flat back."], mistakes:["Leaning to one side or shrugging","Letting the dumbbells swing","Rounding the back to pick up or set down"]},
-  "push-up": {name:"Push-Up", note:"Hands up on a bench if needed to get good-form reps.", cues:["Hands slightly wider than shoulders; body in one straight line.","Lower your chest toward the floor, elbows about 45° from your body.","Push the floor away until arms are straight.","End each set about 2 reps before failure."], mistakes:["Hips sagging or piking up","Elbows flared straight out","Half reps or head dropping"]},
+  "farmer-carry": {name:"Farmer Carry", cues:["Pick up heavy weights with a flat back.","Stand tall, shoulders back and down, arms straight.","Walk with short, controlled steps; brace your abs.","Set them down with a flat back."], mistakes:["Leaning to one side or shrugging","Letting the weights swing","Rounding the back to pick up or set down"]},
+  "push-up": {name:"Push-Up", bw:1, note:"Hands up on a bench if needed to get good-form reps. To progress, put your feet on the bench.", cues:["Hands slightly wider than shoulders; body in one straight line.","Lower your chest toward the floor, elbows about 45° from your body.","Push the floor away until arms are straight.","End each set about 2 reps before failure."], mistakes:["Hips sagging or piking up","Elbows flared straight out","Half reps or head dropping"]},
+  "kb-swing": {name:"Kettlebell Swing", note:"A hip hinge, not a squat and not an arm lift.", cues:["Feet a bit wider than shoulders, bell about a foot in front of you.","Hike the bell back between your legs by pushing your hips back, flat back, soft knees.","Snap your hips forward and squeeze your glutes; the bell floats up to about chest height.","Let it fall back into the next hinge; arms stay long and relaxed."], mistakes:["Squatting down instead of hinging","Lifting the bell with your arms","Leaning back at the top"]},
   "step-up": {name:"Step-Up", cues:["Use a sturdy box or bench, knee height or lower.","Put your whole foot on the box.","Drive through that heel to stand tall on top.","Step down slowly; finish one leg, then switch."], mistakes:["Pushing off the back foot","Front knee caving in","Dropping down fast"]},
   "rear-delt-fly": {name:"Rear-Delt Fly", cues:["Hinge forward until your torso is nearly parallel to the floor, back flat.","Light dumbbells hang under your shoulders, palms in, elbows slightly bent.","Raise arms out to the sides to shoulder height, leading with the back of the shoulders.","Lower slowly."], mistakes:["Going heavy and swinging","Shrugging the shoulders","Standing up as you lift"]},
-  "dead-bug": {name:"Dead Bug", cues:["Lie on your back, arms straight up, hips and knees bent 90° (tabletop).","Press your lower back gently into the floor.","Slowly reach one arm overhead while straightening the opposite leg, hovering just off the floor.","Return and switch sides; breathe out as you reach."], mistakes:["Lower back arching off the floor","Rushing the reps","Moving the same-side arm and leg"]}
+  "dead-bug": {name:"Dead Bug", bw:1, cues:["Lie on your back, arms straight up, hips and knees bent 90° (tabletop).","Press your lower back gently into the floor.","Slowly reach one arm overhead while straightening the opposite leg, hovering just off the floor.","Return and switch sides; breathe out as you reach."], mistakes:["Lower back arching off the floor","Rushing the reps","Moving the same-side arm and leg"]},
+  /* ---- gym ---- */
+  "bb-squat": {name:"Barbell Back Squat", note:"Squat in a rack with the safety arms set just below your bottom position.", cues:["Bar across your upper back (on the muscle, not your neck), hands just outside shoulders, elbows down.","Feet shoulder-width, toes slightly out; take a big breath and brace before each rep.","Sit hips down and back, knees tracking over your toes, until thighs are about parallel.","Drive up through the whole foot, keeping the bar over the middle of your foot."], mistakes:["Heels lifting or weight shifting to the toes","Knees caving inward","Hips shooting up first so the chest drops"]},
+  "bb-bench": {name:"Barbell Bench Press", note:"Use the rack's safety arms (set just below chest height) or a spotter.", cues:["Eyes under the bar, feet flat, shoulder blades squeezed and pinned.","Grip a bit wider than shoulders, wrists stacked over elbows.","Lower the bar under control to your lower chest, elbows about 45° from your body.","Press up and slightly back over your shoulders."], mistakes:["Bouncing the bar off your chest","Elbows flared straight out to 90°","Hips lifting off the bench"]},
+  "cable-row": {name:"Seated Cable Row", cues:["Sit tall, feet on the platform, knees slightly bent.","Start with arms long and shoulders reaching forward a little.","Pull the handle to your belly, driving your elbows back, chest up.","Pause, then let your arms straighten slowly."], mistakes:["Rocking your torso back and forth to move the weight","Shrugging toward the ears","Rounding the lower back"]},
+  "bb-rdl": {name:"Barbell Romanian Deadlift", cues:["Stand tall, bar at your hips, hands just outside your thighs, soft knees.","Push hips straight back; slide the bar down your thighs, close to your legs.","Keep a flat back; stop at a strong hamstring stretch (around knee to mid-shin).","Squeeze your glutes to stand tall; don't lean back at the top."], mistakes:["Rounding the back","Bar drifting away from your legs","Bending the knees into a squat"]},
+  "cable-lateral-raise": {name:"Cable Lateral Raise", cues:["Stand side-on to a low pulley, handle in the far hand, cable crossing in front of you.","Slight bend in the elbow; hold the machine with your other hand.","Raise your arm out to the side to shoulder height, leading with the elbow.","Lower slowly against the cable's pull."], mistakes:["Leaning away to swing the weight","Shrugging the shoulder","Raising above shoulder height"]},
+  "cable-crunch": {name:"Cable Crunch", cues:["Kneel facing a high pulley, rope held beside your head.","Keep your hips still, stacked over your knees.","Curl your ribs toward your hips, rounding your spine, elbows toward your thighs.","Pause, then uncurl slowly."], mistakes:["Sitting your hips back to pull with bodyweight","Pulling with your arms","Rushing the return"]},
+  "leg-press": {name:"Leg Press", note:"Set the safety stops before you start.", cues:["Back and hips flat on the pad, feet shoulder-width in the middle of the platform.","Release the safeties; lower the platform under control.","Go as deep as you can while your lower back stays on the pad.","Press through the whole foot; stop just short of locking your knees."], mistakes:["Lower back or hips rolling off the pad at the bottom","Locking the knees hard at the top","Knees caving inward"]},
+  "lat-pulldown": {name:"Lat Pulldown", cues:["Thighs locked under the pad, grip a bit wider than your shoulders.","Lean back slightly, chest up.","Pull the bar to your upper chest, driving your elbows down to your sides.","Let it rise slowly until your arms are straight."], mistakes:["Leaning way back to yank the weight","Pulling the bar behind your neck","Cutting the stretch short at the top"]},
+  "leg-curl": {name:"Leg Curl (Lying or Seated)", note:"Shown: lying leg curl. The seated machine works the same way.", cues:["Line your knees up with the machine's pivot; pad just above your heels.","Hold the handles and keep your hips pressed down.","Curl your heels toward your glutes.","Lower slowly all the way."], mistakes:["Hips lifting off the pad","Swinging the weight up","Short range at the bottom"]},
+  "ez-curl": {name:"EZ-Bar Curl", cues:["Grip the angled part of the bar, elbows pinned at your sides.","Curl up until your forearms are vertical.","Squeeze, then lower slowly (2–3 seconds).","Fully straighten at the bottom."], mistakes:["Swinging with the hips or back","Elbows drifting forward","Half reps"]},
+  "cable-pushdown": {name:"Cable Triceps Pushdown", cues:["Stand tall facing a high pulley, rope or bar at chest height.","Pin your elbows at your sides.","Push down until your arms are straight; spread the rope at the bottom.","Let your forearms rise slowly to just above parallel."], mistakes:["Elbows drifting forward or flaring","Leaning over the weight","Shoulders rolling forward"]},
+  "hack-squat": {name:"Hack Squat", note:"No hack squat machine? Do dumbbell Bulgarian split squats (rear foot on a bench) instead.", cues:["Back and shoulders flat against the pads, feet shoulder-width in the middle of the platform.","Release the safeties and lower under control.","Go down until your thighs are about parallel to the platform.","Drive up through the whole foot; don't lock out hard."], mistakes:["Heels lifting","Knees caving in","Hips coming off the pad"]},
+  "incline-db-press": {name:"Incline Dumbbell Press", cues:["Set the bench to about 30°; sit back with shoulder blades pinched.","Start with the dumbbells over your upper chest, arms straight.","Lower slowly until your elbows are just below the bench, about 45° from your body.","Press up and slightly together."], mistakes:["Bench set too steep (it turns into a shoulder press)","Elbows flared straight out","Bouncing at the bottom"]},
+  "pull-up": {name:"Pull-Up (or Heavy One-Arm Row)", wLabel:"Assist or row weight", note:"Use the assisted pull-up machine or a band if needed. Can't do pull-ups yet? Do heavy one-arm dumbbell rows instead.", cues:["Hang from the bar, hands a bit wider than shoulders, arms straight.","Pull your shoulders down and back, then drive your elbows down.","Pull until your chin clears the bar.","Lower all the way under control."], mistakes:["Kicking or swinging","Half reps","Shrugging at the top"]},
+  "hip-thrust": {name:"Barbell Hip Thrust", note:"Use a bar pad across your hips.", cues:["Upper back against the edge of a bench, bar across your hip crease.","Feet flat, about shoulder-width; shins vertical at the top.","Drive through your heels to lift your hips until your body is a straight line from shoulders to knees.","Keep chin tucked and ribs down; pause and squeeze your glutes."], mistakes:["Arching the lower back at the top","Feet too far out or too close in","Pushing through your toes"]},
+  "reverse-pec-deck": {name:"Reverse Pec Deck", cues:["Sit facing the pad, chest against it, handles at shoulder height.","Slight bend in the elbows.","Sweep your arms back until they line up with your body.","Return slowly."], mistakes:["Shrugging","Swinging with the torso","Going too heavy"]},
+  "hanging-knee-raise": {name:"Hanging Knee Raise", bw:1, cues:["Hang from a bar with straight arms, shoulders pulled down (not shrugged up).","Brace, then raise your knees to hip height or higher.","Tilt your pelvis up at the top (tuck).","Lower slowly without swinging."], mistakes:["Swinging","Leaning back","Dropping the legs fast"]}
 };
-/* side: label for unilateral work; note: day-specific detail; ss:1/2 = superset first/second; hold: [min,max] seconds; repsText: free-text target */
-const DAYS = {
-  A: [{id:"goblet-squat",sets:4,reps:"10–15",note:"3-second lowering."},
-      {id:"db-bench",sets:4,reps:"10–15"},
-      {id:"one-arm-row",sets:4,reps:"10–12",side:"each side"},
-      {id:"rdl",sets:3,reps:"12–15",note:"Hip hinge, soft knees, flat back."},
-      {id:"lateral-raise",sets:3,reps:"15–20"},
-      {id:"plank",sets:3,reps:"30–45 s",hold:[30,45]}],
-  B: [{id:"split-squat",sets:3,reps:"8–12",side:"each leg"},
-      {id:"seated-oh-press",sets:4,reps:"10–12"},
-      {id:"chest-supported-row",sets:4,reps:"12–15"},
-      {id:"sl-rdl",sets:3,reps:"10–12",side:"each leg for SL RDL"},
-      {id:"db-curl",sets:3,reps:"12–15",ss:1,tag:"5a"},
-      {id:"oh-triceps",sets:3,reps:"12–15",ss:2,tag:"5b"},
-      {id:"farmer-carry",sets:3,reps:"40 steps",note:"Use your heaviest dumbbells."}],
-  C: [{id:"goblet-squat-pause",sets:3,reps:"10–12",note:"2-second pause at the bottom."},
-      {id:"push-up",sets:3,repsText:"stop about 2 reps short of failure"},
-      {id:"one-arm-row",sets:3,reps:"12–15",side:"each side"},
-      {id:"step-up",sets:3,reps:"10",side:"each leg"},
-      {id:"rear-delt-fly",sets:3,reps:"15–20"},
-      {id:"dead-bug",sets:3,reps:"10",side:"each side"}]
+/* sets, reps, rest (s): per-exercise default rest; kb: kettlebell works best; fail: last set may go to failure;
+   side: unilateral label; note: day detail; ss:1/2 superset first/second; hold:[min,max] s; repsText: free text; start: suggested starting weight */
+const PLANS = {
+  home: {
+    A: [{id:"goblet-squat",sets:4,reps:"10–15",rest:90,kb:1,note:"3-second lowering.",start:"35 lb kettlebell"},
+        {id:"db-bench",sets:4,reps:"10–15",rest:90,start:"25s–35s"},
+        {id:"one-arm-row",sets:4,reps:"10–12",side:"each side",rest:60,start:"35"},
+        {id:"rdl",sets:3,reps:"12–15",rest:90,note:"Hip hinge, soft knees, flat back.",start:"35s"},
+        {id:"lateral-raise",sets:3,reps:"15–20",rest:60,fail:1,start:"10s"},
+        {id:"plank",sets:3,reps:"30–45 s",hold:[30,45],rest:45}],
+    B: [{id:"split-squat",sets:3,reps:"8–12",side:"each leg",rest:90,start:"25s"},
+        {id:"seated-oh-press",sets:3,reps:"10–12",rest:90,start:"20s"},
+        {id:"db-floor-press",sets:3,reps:"12–20",rest:90,start:"25s–35s"},
+        {id:"chest-supported-row",sets:4,reps:"12–15",rest:60,start:"25s–35s"},
+        {id:"sl-rdl",sets:3,reps:"10–12",side:"each leg",rest:60,kb:1,note:"Kettlebell in the hand opposite your standing leg.",start:"35 lb kettlebell"},
+        {id:"db-curl",sets:3,reps:"12–15",ss:1,rest:75,fail:1,start:"15s–20s"},
+        {id:"oh-triceps",sets:3,reps:"12–15",ss:2,rest:75,fail:1,start:"20–25"},
+        {id:"farmer-carry",sets:3,reps:"40 steps",rest:90,note:"Heaviest dumbbells. Option: one-hand kettlebell suitcase carry (switch hands each set).",start:"35s"}],
+    C: [{id:"goblet-squat-pause",sets:3,reps:"10–12",rest:90,kb:1,note:"2-second pause at the bottom.",start:"35 lb kettlebell"},
+        {id:"push-up",sets:3,repsText:"stop about 2 reps short of failure",rest:90},
+        {id:"one-arm-row",sets:3,reps:"12–15",side:"each side",rest:60,start:"35"},
+        {id:"kb-swing",sets:3,reps:"15–20",rest:90,kb:1,note:"Snap the hips; the bell floats to chest height.",start:"35 lb kettlebell"},
+        {id:"step-up",sets:3,reps:"10",side:"each leg",rest:90,start:"15s–25s"},
+        {id:"rear-delt-fly",sets:3,reps:"15–20",rest:60,fail:1,start:"5s–10s"},
+        {id:"dead-bug",sets:3,reps:"10",side:"each side",rest:45}]
+  },
+  gym: {
+    A: [{id:"bb-squat",sets:3,reps:"6–10",rest:150},
+        {id:"bb-bench",sets:4,reps:"6–10",rest:150},
+        {id:"cable-row",sets:3,reps:"8–12",rest:90},
+        {id:"bb-rdl",sets:3,reps:"8–10",rest:120},
+        {id:"cable-lateral-raise",sets:3,reps:"12–15",side:"each side",rest:60,fail:1},
+        {id:"cable-crunch",sets:3,reps:"10–15",rest:60,fail:1}],
+    B: [{id:"leg-press",sets:3,reps:"10–15",rest:120},
+        {id:"seated-oh-press",sets:3,reps:"8–12",rest:90},
+        {id:"lat-pulldown",sets:3,reps:"8–12",rest:90,fail:1},
+        {id:"leg-curl",sets:3,reps:"10–15",rest:90,fail:1},
+        {id:"ez-curl",sets:3,reps:"10–15",ss:1,rest:75,fail:1},
+        {id:"cable-pushdown",sets:3,reps:"10–15",ss:2,rest:75,fail:1},
+        {id:"farmer-carry",sets:3,reps:"40 steps",rest:90,note:"Go heavy: heavy dumbbells or farmer handles."}],
+    C: [{id:"hack-squat",sets:3,reps:"8–12",rest:120},
+        {id:"incline-db-press",sets:4,reps:"8–12",rest:90},
+        {id:"pull-up",sets:3,reps:"6–12",rest:120,note:"Assisted if needed, or heavy one-arm rows."},
+        {id:"hip-thrust",sets:3,reps:"8–12",rest:90},
+        {id:"reverse-pec-deck",sets:3,reps:"12–20",rest:60,fail:1},
+        {id:"hanging-knee-raise",sets:3,reps:"10–15",rest:60}]
+  }
 };
+const MODES = {home:"Home", gym:"Gym"};
+/* superset labels (5a/5b, 6a/6b) from position */
+for(const m in PLANS) for(const d in PLANS[m]){ let n=0; PLANS[m][d].forEach(it=>{ if(it.ss!==2) n++; if(it.ss) it.tag=n+(it.ss===1?"a":"b"); }); }
 const RULES = [
-  "Rest 60–90 seconds between sets (the timer starts at 75 s; adjust with −15 / +15).",
-  "Finish each set with 1–2 good reps left in the tank.",
+  "Stop most sets 1–2 reps short of failure (good reps left in the tank).",
+  "True failure only on the last set of exercises marked “Last set can go to failure” (safe isolation moves, about 1 set in 10). Never take squats, bench press or Romanian deadlifts to failure without a spotter.",
+  "Rest: big lifts 2–3 min at the gym, 90 s at home; small moves 45–75 s. Each exercise's timer starts at its own default; −15 / +15 is remembered for that exercise.",
+  "When you hit the top of the rep range with clean form, go heavier. Gym: add 5–10 lb. Home: next dumbbell up, then harder versions (3–4 second lowering, pauses, single-arm / single-leg).",
   "First two weeks: 2 sets of everything.",
-  "Progression with a 35 lb max: add reps up to about 20, then make it harder with a 3–4 second lowering, pauses, or single-arm / single-leg versions."
+  "The weight box on each exercise remembers the last weight you entered (separately for Home and Gym)."
 ];
-const RAMP_DAYS = 14, RAMP_SETS = 2, DEFAULT_REST = 75;
+const EQUIP = "Home equipment: dumbbells 5–25 lb (5-lb steps), 25s and 35s, and a 35 lb kettlebell. ⭐ = kettlebell works best.";
+const RAMP_DAYS = 14, RAMP_SETS = 2;
+/* sessions saved before Home/Gym existed (exercise order of the old plan) */
+const LEGACY_IDS = {A:["goblet-squat","db-bench","one-arm-row","rdl","lateral-raise","plank"],
+  B:["split-squat","seated-oh-press","chest-supported-row","sl-rdl","db-curl","oh-triceps","farmer-carry"],
+  C:["goblet-squat-pause","push-up","one-arm-row","step-up","rear-delt-fly","dead-bug"]};
+
+/* ============ FIGURE GEOMETRY ============ */
+const SVGNS="http://www.w3.org/2000/svg";
+const L={t:50,ua:27,fa:25,th:38,sh:38,ft:13,hr:10};
+const R=Math.PI/180, dir=(a,len)=>[Math.sin(a*R)*len,Math.cos(a*R)*len];
+const add=(p,v)=>[p[0]+v[0],p[1]+v[1]], mul=(v,k)=>[v[0]*k,v[1]*k];
+const GROUND=176, ANK=170;
 
 /* ============ ANIMATION POSES ============ */
 /* Side view, facing right. Angles in degrees: 0 = straight down, 90 = forward (right), 180 = up, -90 = back (left).
    t torso (hip->shoulder), ua/fa near upper/fore arm, th/sh near thigh/shin, fd foot; ...2 = far side.
    line: straight-body mode (plank/push-up), e = body angle above horizontal from the ankles.
-   fixN / fix2: near / far ankle planted (2-bone IK). tm: [cycle ms, lower, hold, raise] fractions. walk: cycle all poses. */
+   fixN / fix2: near / far ankle planted (2-bone IK). ankT: per-pose ankle target (knee side = anim.kp).
+   shT: torso aims at this point. hand / hrel [along torso, toward back] / hhip [dx,dy]: hand target (elbow side = anim.ep).
+   curl: spine rounding (px). plate: barbell plate at the hands. kb: kettlebell instead of dumbbells.
+   props: static scenery; fx(k): moving machine parts / cables. tm: [cycle ms, lower, hold, raise] fractions. walk: cycle all poses. */
 const GOB=[{t:180,ua:15,fa:165,th:0,sh:0},{t:148,ua:45,fa:172,th:88,sh:-32}];
+const RDLP=[{t:178,th:2,sh:0,hand:[110,104]},{t:100,th:30,sh:-8,hand:[114,138]}];
+const BENCHP=[{hip:[118,136],t:-90,ua:180,fa:180,th:96,sh:-6},{hip:[118,136],t:-90,ua:50,fa:180,th:96,sh:-6}];
+const CURLP=[{t:180,ua:6,fa:8,th:0,sh:0},{t:180,ua:6,fa:158,th:0,sh:0}];
+/* shape helpers for props / fx: [tag, attrs] */
+const S={
+  ln:(a,b,w,cls)=>["line",{x1:a[0],y1:a[1],x2:b[0],y2:b[1],class:cls||"mach","stroke-width":w||5,"stroke-linecap":"round"}],
+  cable:(a,b)=>["line",{x1:a[0],y1:a[1],x2:b[0],y2:b[1],class:"cable"}],
+  c:(p,r,cls)=>["circle",{cx:p[0],cy:p[1],r,class:cls||"prop"}],
+  rect:(x,y,w,h)=>["rect",{x,y,width:w,height:h,rx:3,class:"prop"}],
+  poly:(ps)=>["polygon",{points:ps.map(q=>q[0].toFixed(1)+","+q[1].toFixed(1)).join(" "),class:"prop"}]
+};
+/* pad along the torso: s0..s1 along it, o0..o1 toward the back (negative = chest side) */
+function torsoPad(k,s0,s1,o0,o1){ const u=dir(k.t,1), n=dir(k.t+90,1), at=(s,o)=>add(add(k.hip,mul(u,s)),mul(n,o)); return S.poly([at(s0,o0),at(s1,o0),at(s1,o1),at(s0,o1)]); }
+const column=(x,top)=>[S.rect(x,top,12,GROUND-top)];
 const ANIM = {
-  "goblet-squat":{poses:GOB,goblet:1,tm:[5000,.6,.04,.24]},
-  "goblet-squat-pause":{poses:GOB,goblet:1,tm:[5200,.3,.42,.2]},
-  "db-bench":{poses:[{hip:[118,136],t:-90,ua:180,fa:180,th:96,sh:-6},{hip:[118,136],t:-90,ua:50,fa:180,th:96,sh:-6}],props:[["bench",40,142,138]]},
+  "goblet-squat":{poses:GOB,goblet:1,kb:1,tm:[5000,.6,.04,.24]},
+  "goblet-squat-pause":{poses:GOB,goblet:1,kb:1,tm:[5200,.3,.42,.2]},
+  "db-bench":{poses:BENCHP,props:[["bench",40,142,138]]},
+  "db-floor-press":{poses:[{hip:[130,170],t:-90,ua:180,fa:180,ankT:[172,170]},{hip:[130,170],t:-90,ua:76,fa:180,ankT:[172,170]}],kp:"up"},
   "one-arm-row":{poses:[{t:102,ua:0,fa:0,ua2:12,fa2:0,th:12,sh:0,th2:-14,sh2:-8},{t:102,ua:-118,fa:-4,ua2:12,fa2:0,th:12,sh:0,th2:-14,sh2:-8}],props:[["block",150,140,30]],noFarDB:1},
-  "rdl":{poses:[{t:180,ua:6,fa:6,th:0,sh:0},{t:96,ua:-2,fa:-2,th:16,sh:-6}]},
+  "rdl":{poses:RDLP,ep:"back"},
   "lateral-raise":{view:"front",poses:[{la:8,eb:4},{la:86,eb:10}]},
   "plank":{line:{ankle:[12,165]},poses:[{e:11.5,ua:0,fa:90,fd:30},{e:12.2,ua:-1,fa:90,fd:30}],noHandDB:1,tm:[3600,.45,.05,.45]},
   "split-squat":{poses:[{t:180,ua:6,fa:6,th:25,sh:25,fd2:56},{t:178,ua:6,fa:6,th:85,sh:-5,fd2:56}],ax:132,fix2:[68,164]},
   "seated-oh-press":{poses:[{t:180,ua:16,fa:176,th:90,sh:0},{t:180,ua:176,fa:180,th:90,sh:0}],ax:140,props:[["block",78,139,40],["block",86,84,7,55]]},
   "chest-supported-row":{poses:[{hip:[104,104],t:125,ua:0,fa:0,th:-30,sh:-30,fd:60},{hip:[104,104],t:125,ua:-125,fa:-4,th:-30,sh:-30,fd:60}],pad:1},
-  "sl-rdl":{poses:[{t:180,ua:4,fa:4,th:0,sh:0,th2:6,sh2:-14,fd2:90},{t:94,ua:-2,fa:-2,th:12,sh:-4,th2:-86,sh2:-86,fd2:0}],noNearDB:1,ax:112,tm:[3400,.4,.12,.38]},
-  "db-curl":{poses:[{t:180,ua:6,fa:8,th:0,sh:0},{t:180,ua:6,fa:158,th:0,sh:0}]},
+  "sl-rdl":{poses:[{t:180,ua:4,fa:4,th:0,sh:0,th2:6,sh2:-14,fd2:90},{t:94,ua:-2,fa:-2,th:12,sh:-4,th2:-86,sh2:-86,fd2:0}],noNearDB:1,kb:1,ax:112,tm:[3400,.4,.12,.38]},
+  "db-curl":{poses:CURLP},
   "oh-triceps":{poses:[{t:180,ua:172,fa:-22,th:0,sh:0},{t:180,ua:172,fa:178,th:0,sh:0}],goblet:1},
   "farmer-carry":{walk:1600,poses:[
      {hip:[110,96],t:180,ua:3,fa:3,th:22,sh:6,fd:90,th2:-18,sh2:-34,fd2:60},
@@ -213,9 +313,48 @@ const ANIM = {
      {hip:[110,96],t:180,ua:3,fa:3,th:-18,sh:-34,fd:60,th2:22,sh2:6,fd2:90},
      {hip:[110,95],t:180,ua:3,fa:3,th:22,sh:-30,fd:90,th2:0,sh2:0,fd2:90}]},
   "push-up":{line:{ankle:[30,165],hand:[146,171]},poses:[{e:21.6,fd:30},{e:8,fd:30}],noHandDB:1},
+  "kb-swing":{poses:[{t:182,th:0,sh:0,ua:80,fa:84},{t:112,th:34,sh:-6,ua:-37,fa:-39}],kb:1,noFarDB:1,tm:[2000,.42,.03,.38]},
   "step-up":{poses:[{hip:[114,97],t:176,ua:3,fa:3,th2:-16,sh2:-16,fd2:90},{hip:[140,77],t:174,ua:3,fa:3,th2:68,sh2:-58,fd2:90}],fixN:[148,147],props:[["block",130,153,52]],tm:[3200,.4,.1,.4]},
   "rear-delt-fly":{view:"front",hinge:1,inset:{t:96,ua:0,fa:4,th:14,sh:-6},poses:[{la:9,eb:8},{la:84,eb:16}]},
-  "dead-bug":{poses:[{hip:[122,168],t:-90,ua:180,fa:180,ua2:180,fa2:180,th:180,sh:90,fd:180,th2:180,sh2:90,fd2:180},{hip:[122,168],t:-90,ua:262,fa:262,ua2:180,fa2:180,th:180,sh:90,fd:180,th2:96,sh2:96,fd2:180}],noHandDB:1,tm:[3600,.4,.1,.4]}
+  "dead-bug":{poses:[{hip:[122,168],t:-90,ua:180,fa:180,ua2:180,fa2:180,th:180,sh:90,fd:180,th2:180,sh2:90,fd2:180},{hip:[122,168],t:-90,ua:262,fa:262,ua2:180,fa2:180,th:180,sh:90,fd:180,th2:96,sh2:96,fd2:180}],noHandDB:1,tm:[3600,.4,.1,.4]},
+  /* ---- gym ---- */
+  "bb-squat":{poses:[{t:172,th:2,sh:-2,hrel:[-3,9]},{t:138,th:88,sh:-30,hrel:[-3,9]}],plate:15,noHandDB:1,tm:[3200,.45,.06,.4]},
+  "bb-bench":{poses:BENCHP,plate:14,noHandDB:1,props:[["bench",40,142,138],["block",30,70,6],["block",30,74,20,5]]},
+  "cable-row":{poses:[{hip:[72,146],t:158,ankT:[134,152],hand:[140,124]},{hip:[72,146],t:182,ankT:[134,152],hand:[90,126]}],kp:"up",ep:"back",noHandDB:1,
+     props:[["block",34,152,80],...column(184,40).map(x=>["shape",x]),["shape",S.poly([[138,138],[145,138],[150,176],[142,176]])],["shape",S.c([182,126],5)]],
+     fx:k=>[S.cable([182,126],k.hd),S.ln(add(k.hd,[0,-5]),add(k.hd,[0,5]),4,"handle")]},
+  "bb-rdl":{poses:RDLP,ep:"back",plate:14,noHandDB:1},
+  "cable-lateral-raise":{view:"front",one:1,noDB:1,poses:[{la:12,eb:4,la2:58},{la:88,eb:8,la2:58}],
+     props:[["block",176,30,12],["shape",S.c([174,166],5)]],
+     fx:k=>[S.cable([174,166],k.wL),S.c(k.wL,4,"handle")]},
+  "cable-crunch":{poses:[{hip:[92,128],t:158,ankT:[56,170],fd:-90,hrel:[10,-7]},{hip:[92,128],t:122,curl:9,ankT:[56,170],fd:-90,hrel:[10,-7]}],kp:"fwd",ep:"down",noHandDB:1,
+     props:[["block",188,14,12],["shape",S.c([186,24],5)]],
+     fx:k=>[S.cable([186,24],k.hd),S.ln(k.hd,add(k.hd,[0,6]),4,"handle")]},
+  "leg-press":{poses:[{hip:[84,138],t:-128,ankT:[136,84],fd:-135,hhip:[6,0]},{hip:[84,138],t:-128,ankT:[112,108],fd:-135,hhip:[6,0]}],kp:"up",ep:"down",noHandDB:1,tm:[3000,.45,.06,.4],
+     props:[["fn",k=>[torsoPad(k,-12,62,5,13),S.rect(40,146,80,7),S.rect(74,153,8,GROUND-153),S.ln([112,132],[180,64],6)]]],
+     fx:k=>{ const u=[.7071,-.7071], v=[-.7071,-.7071], c=add(k.ank,mul(u,6)); return [S.ln(add(c,mul(v,20)),add(c,mul(v,-14)),7),S.ln(add(c,mul(u,2)),add(c,mul([.7071,.7071],12)),5)]; }},
+  "lat-pulldown":{poses:[{hip:[96,132],t:186,th:88,sh:2,hand:[108,34]},{hip:[96,132],t:194,th:88,sh:2,hand:[100,82]}],ep:"back",noHandDB:1,
+     props:[["block",68,138,50,7],["block",90,145,7],["block",120,117,24,8],["block",150,6,10],["shape",S.ln([110,6],[156,6],6)],["shape",S.c([110,9],4)]],
+     fx:k=>[S.cable([110,9],k.hd),S.ln(add(k.hd,[-11,3]),add(k.hd,[11,3]),4,"handle")]},
+  "leg-curl":{poses:[{hip:[96,130],t:90,th:-90,sh:265,fd:355,hand:[168,152]},{hip:[96,130],t:90,th:-90,sh:165,fd:255,hand:[168,152]}],ep:"down",noHandDB:1,
+     props:[["block",56,136,118,8],["block",66,144,7],["block",160,144,7]],
+     fx:k=>{ const u=mul(add(k.ank,mul(k.knee,-1)),1/L.sh), n=[-u[1],u[0]], pad=add(add(k.knee,mul(u,31)),mul(n,8)); return [S.ln(k.knee,pad,4),S.c(pad,6,"handle")]; }},
+  "ez-curl":{poses:CURLP,plate:10,noHandDB:1},
+  "cable-pushdown":{poses:[{t:174,ua:8,fa:108,th:0,sh:0},{t:174,ua:6,fa:4,th:0,sh:0}],noHandDB:1,
+     props:[["block",184,14,12],["shape",S.c([182,26],5)]],
+     fx:k=>[S.cable([182,26],k.hd),S.ln(k.hd,add(k.hd,[0,7]),4,"handle")]},
+  "hack-squat":{poses:[{hip:[100,94],t:-152,ankT:[126,162],fd:104,hrel:[2,-12]},{hip:[116,124],t:-152,ankT:[126,162],fd:104,hrel:[2,-12]}],kp:"fwd",ep:"down",noHandDB:1,tm:[3200,.45,.06,.4],
+     props:[["shape",S.poly([[106,170],[158,157],[160,165],[108,178]])],["shape",S.ln([74,104],[112,174],6)]],
+     fx:k=>[torsoPad(k,-10,58,5,12),torsoPad(k,46,54,-10,5)]},
+  "incline-db-press":{poses:[{hip:[124,132],t:-130,th:90,sh:0,hand:[86,48]},{hip:[124,132],t:-130,th:90,sh:0,hand:[92,86]}],ep:"down",
+     props:[["fn",k=>[torsoPad(k,-12,60,5,12),S.rect(98,139,42,6),S.rect(114,145,7,GROUND-145),S.ln(add(k.hip,mul(dir(k.t+90,1),12)),[96,174],5)]]]},
+  "pull-up":{noGround:1,poses:[{hip:[108,128],t:178,th:14,sh:-75,fd:60,hand:[112,26]},{hip:[106,80],t:188,th:14,sh:-75,fd:60,hand:[112,26]}],ep:"fwd",noHandDB:1,tm:[3000,.42,.1,.42],
+     props:[["shape",S.ln([112,26],[186,26],6)],["shape",S.ln([186,26],[186,192],6)],["shape",S.c([112,26],4.5,"handle")]]},
+  "hip-thrust":{poses:[{hip:[102,160],shT:[66,124],ankT:[146,170],hhip:[0,-11]},{hip:[116,122],shT:[66,124],ankT:[146,170],hhip:[0,-11]}],kp:"up",ep:"up",plate:15,noHandDB:1,tm:[3000,.4,.15,.4],
+     props:[["block",22,128,46]]},
+  "reverse-pec-deck":{view:"top",poses:[{a:-16,eb:6},{a:92,eb:10}]},
+  "hanging-knee-raise":{noGround:1,poses:[{hip:[106,108],t:178,th:4,sh:-4,hand:[112,6]},{hip:[110,104],t:186,th:96,sh:6,hand:[112,6]}],ep:"fwd",noHandDB:1,
+     props:[["shape",S.ln([112,6],[186,6],6)],["shape",S.ln([186,6],[186,192],6)],["shape",S.c([112,6],4.5,"handle")]]}
 };
 
 /* ============ STORAGE ============ */
@@ -227,32 +366,53 @@ const store = {
 const pad = n => String(n).padStart(2,"0");
 function today(){ const d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
 function dayDiff(a,b){ const p=s=>{const [y,m,d]=s.split("-").map(Number);return Date.UTC(y,m-1,d);}; return Math.round((p(b)-p(a))/864e5); }
+/* rotation A→B→C is shared by Home and Gym */
 function nextDay(){ const last=store.get("wfg:last"); return last ? ({A:"B",B:"C",C:"A"})[last.day]||"A" : "A"; }
 function rampActive(){ const f=store.get("wfg:firstStart"); return !f || dayDiff(f,today()) < RAMP_DAYS; }
-function restDefault(){ const r=store.get("wfg:rest"); return (typeof r==="number" && r>=15 && r<=300) ? r : DEFAULT_REST; }
-function current(){ const k=store.get("wfg:current"); if(!k) return null; const s=store.get(k); return s && !s.completed ? s : null; }
+const itemsOf = s => PLANS[s.mode][s.day];
+const lastMode = () => { const m=store.get("wfg:mode"); return MODES[m]?m:null; };
+/* per-exercise rest (default from the plan; −15/+15 remembered per mode + exercise) */
+function restFor(mode,it){ const m=store.get("wfg:restx")||{}, v=m[mode+":"+it.id]; return (typeof v==="number"&&v>=15&&v<=600)?v:it.rest; }
+function setRestFor(mode,id,v){ const m=store.get("wfg:restx")||{}; m[mode+":"+id]=v; store.set("wfg:restx",m); }
+/* weight memory: last entered weight per exercise, separately for Home and Gym */
+function weights(mode){ const w=store.get("wfg:w:"+mode); return w&&typeof w==="object"?w:{}; }
+function setWeight(mode,id,v){ const w=weights(mode); if(v) w[id]=v; else delete w[id]; store.set("wfg:w:"+mode,w); }
+/* sessions saved before Home/Gym existed: map them onto the new Home plan by exercise */
+function migrate(s){
+  if(!s||s.mode) return s;
+  const items=PLANS.home[s.day]; if(!items||!Array.isArray(s.sets)) return null;
+  const old=LEGACY_IDS[s.day]||[], curId=old[s.idx];
+  s.sets=items.map(it=>{ const oi=old.indexOf(it.id), prev=(oi>=0&&s.sets[oi])||[], n=s.ramp?Math.min(RAMP_SETS,it.sets):it.sets;
+    return Array.from({length:n},(_,j)=>prev[j]?{d:!!prev[j].d,r:prev[j].r||""}:{d:false,r:""}); });
+  const ni=items.findIndex(it=>it.id===curId); s.idx=ni>=0?ni:0;
+  s.mode="home"; delete s.rest; s.migrated=1; save(s); return s;
+}
+if(store.get("wfg:rest")!=null) store.del("wfg:rest");   // old single rest setting (now per exercise)
+function current(){ const k=store.get("wfg:current"); if(!k) return null; const s=store.get(k); return s && !s.completed && s.day ? migrate(s) : null; }
 function save(s){ store.set(s.key, s); }
-function startSession(){
+function startSession(mode){
   let s=current(); if(s) return s;
+  if(!PLANS[mode]) return null;
   if(!store.get("wfg:firstStart")) store.set("wfg:firstStart", today());
   const day=nextDay(), date=today(), ramp=rampActive();
-  s={key:"wfg:session:"+day+":"+date, day, date, ramp, idx:0, startedAt:Date.now(),
-     sets:DAYS[day].map(it=>Array.from({length: ramp?Math.min(RAMP_SETS,it.sets):it.sets},()=>({d:false,r:""})))};
-  save(s); store.set("wfg:current", s.key); return s;
+  s={key:"wfg:session:"+mode+":"+day+":"+date, mode, day, date, ramp, idx:0, startedAt:Date.now(),
+     sets:PLANS[mode][day].map(it=>Array.from({length: ramp?Math.min(RAMP_SETS,it.sets):it.sets},()=>({d:false,r:""})))};
+  save(s); store.set("wfg:current", s.key); store.set("wfg:mode", mode); return s;
 }
-/* Counted sets: a superset round (5a + 5b) counts as ONE set, so Day B = 20 full / 12 in weeks 1–2. */
-function counts(s){ let d=0,t=0; const items=DAYS[s.day];
+/* Counted sets: a superset round (a + b) counts as ONE set. */
+function counts(s){ let d=0,t=0; const items=itemsOf(s);
   s.sets.forEach((a,i)=>{ const it=items[i]; if(it.ss===2) return;
     a.forEach((x,j)=>{ t++; const done = it.ss===1 ? (x.d && s.sets[i+1][j] && s.sets[i+1][j].d) : x.d; if(done) d++; }); });
   return {d,t}; }
-function planSets(d,ramp){ return DAYS[d].reduce((a,x)=>a+(x.ss===2?0:(ramp?Math.min(RAMP_SETS,x.sets):x.sets)),0); }
+function planSets(mode,d,ramp){ return PLANS[mode][d].reduce((a,x)=>a+(x.ss===2?0:(ramp?Math.min(RAMP_SETS,x.sets):x.sets)),0); }
 function rxText(it,n){ return it.repsText ? n+' sets · '+it.repsText : n+' × '+it.reps; }
+function fmtRest(sec){ return sec<120 ? sec+" s" : (sec%60 ? Math.floor(sec/60)+":"+pad(sec%60) : sec/60)+" min"; }
 function finish(s){
   cancelRest(false);
   const c=counts(s); s.completed=true; s.completedAt=Date.now(); save(s);
-  store.set("wfg:last",{day:s.day,date:s.date,done:c.d,total:c.t});
-  const h=store.get("wfg:history")||[]; h.push({day:s.day,date:s.date,done:c.d,total:c.t}); store.set("wfg:history",h.slice(-200));
-  store.del("wfg:current");
+  store.set("wfg:last",{day:s.day,mode:s.mode,date:s.date,done:c.d,total:c.t});
+  const h=store.get("wfg:history")||[]; h.push({day:s.day,mode:s.mode,date:s.date,done:c.d,total:c.t}); store.set("wfg:history",h.slice(-200));
+  store.del("wfg:current"); pickMode=null;
   go("#/done");
 }
 
@@ -283,7 +443,7 @@ document.addEventListener("touchend", unlockAudio, {passive:true});
 function nextUnchecked(s,i){ return s.sets[i].findIndex(x=>!x.d); }
 /* Where to go after set j of exercise i is checked. Returns {type:'set'|'ex'|'done', i, rest:boolean} */
 function planAfterCheck(s,i){
-  const items=DAYS[s.day], it=items[i];
+  const items=itemsOf(s), it=items[i];
   if(it.ss===1){ // first half of superset: straight to partner, no rest
     if(nextUnchecked(s,i+1)>=0) return {type:"ex",i:i+1,rest:false};
     if(nextUnchecked(s,i)>=0) return {type:"set",i,rest:true};
@@ -292,7 +452,6 @@ function planAfterCheck(s,i){
     if(nextUnchecked(s,i-1)>=0) return {type:"ex",i:i-1,rest:true};
   }
   if(nextUnchecked(s,i)>=0) return {type:"set",i,rest:true};
-  // exercise complete
   if(i+1<items.length) return {type:"ex",i:i+1,rest:true};
   return {type:"done",rest:false};
 }
@@ -303,13 +462,13 @@ function applyTarget(s,tg){
   window.scrollTo(0,0);
 }
 
-/* ============ REST TIMER (timestamp based) ============ */
+/* ============ REST TIMER (timestamp based, per-exercise default) ============ */
 let restTick=null;
 const $=id=>document.getElementById(id);
 function fmt(sec){ sec=Math.max(0,Math.ceil(sec)); return Math.floor(sec/60)+":"+pad(sec%60); }
-function startRest(s,tg,label){
-  const dur=restDefault();
-  s.rest={end:Date.now()+dur*1000,total:dur,tg,label}; save(s);
+function startRest(s,tg,label,it){
+  const dur=restFor(s.mode,it);
+  s.rest={end:Date.now()+dur*1000,total:dur,tg,label,ex:it.id,base:dur}; save(s);
   showRest();
 }
 function showRest(){
@@ -334,8 +493,9 @@ function endRest(withBeep){
 function cancelRest(rerender){ const s=current(); if(s&&s.rest){ delete s.rest; save(s);} hideRest(); if(rerender) render(); }
 function adjustRest(delta){
   const s=current(); if(!s||!s.rest) return;
-  const nd=Math.max(15,Math.min(300,restDefault()+delta)); store.set("wfg:rest",nd);
-  s.rest.end+=delta*1000; s.rest.total=Math.max(15,s.rest.total+delta); save(s); updateRest();
+  const nd=Math.max(15,Math.min(600,(s.rest.base||s.rest.total)+delta));
+  if(s.rest.ex) setRestFor(s.mode,s.rest.ex,nd);
+  s.rest.base=nd; s.rest.end+=delta*1000; s.rest.total=Math.max(15,s.rest.total+delta); save(s); updateRest();
 }
 $("restSkip").onclick=()=>endRest(false);
 $("restMinus").onclick=()=>adjustRest(-15);
@@ -345,43 +505,50 @@ window.addEventListener("focus",updateRest);
 window.addEventListener("pageshow",updateRest);
 
 /* ============ FIGURE RENDERER ============ */
-const SVGNS="http://www.w3.org/2000/svg";
-const L={t:50,ua:27,fa:25,th:38,sh:38,ft:13,hr:10};
-const R=Math.PI/180, dir=(a,len)=>[Math.sin(a*R)*len,Math.cos(a*R)*len];
-const add=(p,v)=>[p[0]+v[0],p[1]+v[1]], mul=(v,k)=>[v[0]*k,v[1]*k];
-const GROUND=176, ANK=170;
-/* 2-bone IK: joint between A and target T. pick: 'fwd' (larger x), 'back' (smaller x), 'down' (larger y) */
+/* 2-bone IK: joint between A and target T. pick: 'fwd' (larger x), 'back' (smaller x), 'down' (larger y), 'up' (smaller y) */
 function ik(A,T,l1,l2,pick){
   const dx=T[0]-A[0], dy=T[1]-A[1], d0=Math.hypot(dx,dy)||0.001, d=Math.max(Math.abs(l1-l2)+0.01,Math.min(d0,l1+l2-0.01));
   const ang=Math.acos(Math.max(-1,Math.min(1,(l1*l1+d*d-l2*l2)/(2*l1*d)))), base=Math.atan2(dy,dx);
   const c1=[A[0]+l1*Math.cos(base+ang),A[1]+l1*Math.sin(base+ang)], c2=[A[0]+l1*Math.cos(base-ang),A[1]+l1*Math.sin(base-ang)];
-  if(pick==="fwd") return c1[0]>c2[0]?c1:c2; if(pick==="back") return c1[0]<c2[0]?c1:c2; return c1[1]>c2[1]?c1:c2;
+  if(pick==="fwd") return c1[0]>c2[0]?c1:c2; if(pick==="back") return c1[0]<c2[0]?c1:c2; if(pick==="up") return c1[1]<c2[1]?c1:c2; return c1[1]>c2[1]?c1:c2;
+}
+/* arm reaching for a target: returns [elbow, hand]; a target out of reach gives a straight arm pointing at it */
+function armTo(A,T,pick,as){
+  const l1=L.ua*as, l2=L.fa*as, d0=Math.hypot(T[0]-A[0],T[1]-A[1])||0.001, max=l1+l2-0.01;
+  const H = d0>max ? add(A,mul([T[0]-A[0],T[1]-A[1]],max/d0)) : T;
+  return [ik(A,H,l1,l2,pick),H];
 }
 function fk(p,anim){
   const f=(k,d)=>p[k]!=null?p[k]:p[d];
   const as=p.as!=null?p.as:1;
-  let hip,knee,ank,knee2,ank2,sh,head;
+  let hip,knee,ank,knee2,ank2,sh,head,t=p.t||0;
   if(anim.line){ // straight body from the ankles (plank, push-up)
     const e=p.e*R, u=[Math.cos(e),-Math.sin(e)];
     ank=anim.line.ankle.slice(); knee=add(ank,mul(u,L.sh)); hip=add(knee,mul(u,L.th));
     sh=add(hip,mul(u,L.t)); head=add(hip,mul(u,L.t+L.hr+4)); knee2=knee; ank2=ank;
   } else {
-    if(anim.fixN){ hip=p.hip.slice(); ank=anim.fixN.slice(); knee=ik(hip,ank,L.th,L.sh,"fwd"); }
+    if(p.ankT){ hip=p.hip.slice(); ank=p.ankT.slice(); knee=ik(hip,ank,L.th,L.sh,anim.kp||"fwd"); }
+    else if(anim.fixN){ hip=p.hip.slice(); ank=anim.fixN.slice(); knee=ik(hip,ank,L.th,L.sh,"fwd"); }
     else {
       const kn=dir(p.th,L.th), an=add(kn,dir(p.sh,L.sh));
       if(p.hip) hip=p.hip.slice(); else { const ax=anim.ax||104; hip=[ax-an[0],ANK-an[1]]; }
       knee=add(hip,kn); ank=add(knee,dir(p.sh,L.sh));
     }
     if(anim.fix2){ ank2=anim.fix2.slice(); knee2=ik(hip,ank2,L.th,L.sh,"down"); }
-    else if(p.th2!=null||!anim.fixN){ knee2=add(hip,dir(f("th2","th"),L.th)); ank2=add(knee2,dir(f("sh2","sh"),L.sh)); }
+    else if(p.th2!=null||!(anim.fixN||p.ankT)){ knee2=add(hip,dir(f("th2","th"),L.th)); ank2=add(knee2,dir(f("sh2","sh"),L.sh)); }
     else { knee2=knee; ank2=ank; }
-    sh=add(hip,dir(p.t,L.t)); head=add(hip,dir(p.t,L.t+L.hr+4));
+    if(p.shT) t=Math.atan2(p.shT[0]-hip[0],p.shT[1]-hip[1])/R;
+    sh=add(hip,dir(t,L.t));
+    const c=add(add(hip,mul(dir(t,L.t),.5)),dir(t+90,(p.curl||0)*2)), v=[sh[0]-c[0],sh[1]-c[1]], vl=Math.hypot(v[0],v[1])||1;
+    head=add(sh,mul(v,(L.hr+4)/vl));
   }
   const toe=add(ank,dir(p.fd!=null?p.fd:90,L.ft)), toe2=add(ank2,dir(p.fd2!=null?p.fd2:(p.fd!=null?p.fd:90),L.ft));
   let el,hd,el2,hd2;
+  const tgt = p.hand ? p.hand : p.hrel ? add(add(sh,dir(t,p.hrel[0])),dir(t+90,p.hrel[1])) : p.hhip ? add(hip,p.hhip) : null;
   if(anim.line&&anim.line.hand){ hd=anim.line.hand.slice(); el=ik(sh,hd,L.ua,L.fa,"back"); el2=el; hd2=hd; }
+  else if(tgt){ [el,hd]=armTo(sh,tgt,anim.ep||"down",as); el2=el; hd2=hd; }
   else { el=add(sh,dir(p.ua,L.ua*as)); hd=add(el,dir(p.fa,L.fa*as)); el2=add(sh,dir(f("ua2","ua"),L.ua*as)); hd2=add(el2,dir(f("fa2","fa"),L.fa*as)); }
-  return {hip,knee,ank,toe,knee2,ank2,toe2,sh,head,el,hd,el2,hd2};
+  return {hip,knee,ank,toe,knee2,ank2,toe2,sh,head,el,hd,el2,hd2,t,curl:p.curl||0};
 }
 function lerpPose(a,b,u){ const o={}; for(const k in a){ const va=a[k], vb=b[k]; if(Array.isArray(va)&&Array.isArray(vb)) o[k]=va.map((x,i)=>x+(vb[i]-x)*u); else if(typeof va==="number" && typeof vb==="number") o[k]=va+(vb-va)*u; else o[k]=va; } return o; }
 function el(tag,attrs,parent){ const e=document.createElementNS(SVGNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
@@ -389,20 +556,30 @@ function line(parent,cls){ return el("line",{class:cls,"stroke-linecap":"round"}
 function setLine(l,a,b){ l.setAttribute("x1",a[0].toFixed(1)); l.setAttribute("y1",a[1].toFixed(1)); l.setAttribute("x2",b[0].toFixed(1)); l.setAttribute("y2",b[1].toFixed(1)); }
 function setC(c,p){ c.setAttribute("cx",p[0].toFixed(1)); c.setAttribute("cy",p[1].toFixed(1)); }
 const pts=a=>a.map(q=>q[0].toFixed(1)+","+q[1].toFixed(1)).join(" ");
+function shapes(g,list){ (list||[]).forEach(s=>{ const a={}; for(const k in s[1]){ const v=s[1][k]; a[k]=typeof v==="number"?+v.toFixed(1):v; } el(s[0],a,g); }); }
+/* kettlebell: handle ring at the hand, bell hanging below (goblet) or flung along the forearm (swing) */
+function mkKB(svg,cls){ return {h:el("circle",{r:4.2,fill:"none",class:cls+"k","stroke-width":2.6},svg), b:el("circle",{r:7.5,class:cls},svg)}; }
+function setKB(kb,elb,hand,goblet){
+  let v=goblet?[0,1]:[hand[0]-elb[0],hand[1]-elb[1]]; const n=Math.hypot(v[0],v[1])||1; v=[v[0]/n,v[1]/n];
+  setC(kb.h,add(hand,mul(v,goblet?1:2))); setC(kb.b,add(hand,mul(v,goblet?9:10)));
+}
 
 let animState=null;
 function mountFigure(container,id){
   const anim=ANIM[id]; container.innerHTML="";
   const svg=el("svg",{viewBox:"0 0 220 190",role:"img","aria-label":EX[id].name+" demonstration"},container);
   const st=el("style",{},svg);
-  st.textContent=".far{stroke:var(--far);stroke-width:7}.near{stroke:var(--near);stroke-width:8}.prop{fill:var(--prop)}.gnd{stroke:var(--line);stroke-width:3}.db{fill:#64748b}.dbn{fill:#334155}@media (prefers-color-scheme:dark){.dbn{fill:#cbd5e1}.db{fill:#7c8aa3}}";
-  setLine(line(svg,"gnd"),[6,GROUND+1],[214,GROUND+1]);
+  st.textContent=".far{stroke:var(--far);stroke-width:7}.near{stroke:var(--near);stroke-width:8;fill:none}.prop{fill:var(--prop)}.mach{stroke:var(--prop)}.gnd{stroke:var(--line);stroke-width:3}.db{fill:#64748b}.dbk{stroke:#64748b}.dbn{fill:#334155}.dbnk{stroke:#334155}.plate{fill:#475569;fill-opacity:.9}.hub{fill:var(--card)}.cable{stroke:var(--muted);stroke-width:1.4}.handle{stroke:#334155;fill:#334155}@media (prefers-color-scheme:dark){.dbn{fill:#cbd5e1}.dbnk{stroke:#cbd5e1}.db{fill:#7c8aa3}.dbk{stroke:#7c8aa3}.plate{fill:#94a3b8}.handle{stroke:#cbd5e1;fill:#cbd5e1}}";
+  if(!anim.noGround) setLine(line(svg,"gnd"),[6,GROUND+1],[214,GROUND+1]);
+  const k0=anim.view?null:fk(anim.poses[0],anim);
   (anim.props||[]).forEach(pr=>{
     if(pr[0]==="bench"){ el("rect",{class:"prop",x:pr[1],y:pr[2],width:pr[3]-pr[1]+40,height:7,rx:3},svg); el("rect",{class:"prop",x:pr[1]+10,y:pr[2]+7,width:6,height:GROUND-pr[2]-7},svg); el("rect",{class:"prop",x:pr[3]+14,y:pr[2]+7,width:6,height:GROUND-pr[2]-7},svg); }
     if(pr[0]==="block"){ el("rect",{class:"prop",x:pr[1],y:pr[2],width:pr[3],height:pr[4]||GROUND-pr[2],rx:3},svg); }
+    if(pr[0]==="shape") shapes(svg,[pr[1]]);
+    if(pr[0]==="fn") shapes(svg,pr[1](k0));
   });
   if(anim.pad){ // incline bench pad under the chest, from the first pose
-    const k=fk(anim.poses[0],anim), t=anim.poses[0].t, u=dir(t,1), n=dir(t-90,1);
+    const k=k0, t=anim.poses[0].t, u=dir(t,1), n=dir(t-90,1);
     const at=(s,o)=>add(add(k.hip,mul(u,s)),mul(n,o));
     el("polygon",{class:"prop",points:pts([at(-16,5),at(50,5),at(50,13),at(-16,13)])},svg);
     const m=at(4,13); el("rect",{class:"prop",x:m[0]-3,y:m[1],width:6,height:GROUND-m[1]},svg);
@@ -414,21 +591,36 @@ function mountFigure(container,id){
     setC(el("circle",{r:L.hr,fill:"var(--near)"},g),k.head); setC(el("circle",{class:"dbn",r:6.5},g),k.hd);
     const tx=el("text",{x:8,y:86,"font-size":"8",fill:"var(--muted)"},svg); tx.textContent="side view";
   }
-  const parts={};
-  if(anim.view==="front"){
+  const parts={fx:el("g",{},svg)};
+  if(anim.view==="top"){
+    const tx=el("text",{x:8,y:16,"font-size":"9",fill:"var(--muted)"},svg); tx.textContent="top view";
+    el("rect",{class:"prop",x:88,y:96,width:44,height:8,rx:3},svg);           // chest pad
+    el("circle",{class:"prop",cx:110,cy:58,r:5},svg);                          // machine pivot
+    parts.levers=[line(svg,"mach"),line(svg,"mach")]; parts.levers.forEach(l=>l.setAttribute("stroke-width","4"));
+    parts.arms=[line(svg,"near"),line(svg,"near"),line(svg,"near"),line(svg,"near")];
+    parts.shoulders=line(svg,"near"); parts.shoulders.setAttribute("stroke-width","12");
+    parts.head=el("circle",{r:11,fill:"var(--near)"},svg);
+    parts.hands=[el("circle",{class:"handle",r:4.5},svg),el("circle",{class:"handle",r:4.5},svg)];
+  } else if(anim.view==="front"){
     parts.legs=[line(svg,"near"),line(svg,"near"),line(svg,"near"),line(svg,"near")];
     parts.torso=line(svg,"near"); parts.hips=line(svg,"near"); parts.shoulders=line(svg,"near");
     parts.arms=[line(svg,"near"),line(svg,"near"),line(svg,"near"),line(svg,"near")];
     parts.head=el("circle",{r:L.hr,fill:"var(--near)"},svg);
-    parts.dbs=[el("rect",{class:"dbn",width:16,height:8,rx:2},svg),el("rect",{class:"dbn",width:16,height:8,rx:2},svg)];
+    parts.dbs=anim.noDB?[]:[el("rect",{class:"dbn",width:16,height:8,rx:2},svg),el("rect",{class:"dbn",width:16,height:8,rx:2},svg)];
+    parts.fx2=el("g",{},svg);
   } else {
     parts.farLeg=[line(svg,"far"),line(svg,"far"),line(svg,"far")];
     parts.farArm=[line(svg,"far"),line(svg,"far")];
-    parts.farDB=anim.noFarDB||anim.noHandDB||anim.goblet?null:el("circle",{class:"db",r:6.5},svg);
-    parts.torso=line(svg,"near"); parts.head=el("circle",{r:L.hr,fill:"var(--near)"},svg);
+    const farHas=!(anim.noFarDB||anim.noHandDB||anim.goblet);
+    parts.farDB=farHas&&!anim.kb?el("circle",{class:"db",r:6.5},svg):null;
+    parts.farKB=farHas&&anim.kb?mkKB(svg,"db"):null;
+    if(anim.plate){ parts.plate=el("circle",{class:"plate",r:anim.plate},svg); parts.hub=el("circle",{class:"hub",r:2.5},svg); }
+    parts.torso=el("path",{class:"near","stroke-linecap":"round"},svg); parts.head=el("circle",{r:L.hr,fill:"var(--near)"},svg);
     parts.nearLeg=[line(svg,"near"),line(svg,"near"),line(svg,"near")];
     parts.nearArm=[line(svg,"near"),line(svg,"near")];
-    parts.nearDB=anim.noHandDB||anim.noNearDB?null:el("circle",{class:"dbn",r:anim.goblet?8:6.5},svg);
+    const nearHas=!(anim.noHandDB||anim.noNearDB);
+    parts.nearDB=nearHas&&!anim.kb?el("circle",{class:"dbn",r:anim.goblet?8:6.5},svg):null;
+    parts.nearKB=nearHas&&anim.kb?mkKB(svg,"dbn"):null;
   }
   const btn=document.createElement("button"); btn.className="pp"; btn.setAttribute("aria-label","Pause or play animation");
   container.appendChild(btn);
@@ -449,6 +641,15 @@ function poseAt(anim,ms){
 function drawFrame(u){ const A=animState; if(!A) return; const P=A.anim.poses; drawPose(A.anim.walk ? P[u>=0.5?2:0] : lerpPose(P[0],P[1],u)); }
 function drawPose(p){
   const A=animState; if(!A) return; const P=A.parts, an=A.anim;
+  if(an.view==="top"){ // reverse pec deck seen from above, facing up
+    const sL=[88,122], sR=[132,122];
+    setLine(P.shoulders,sL,sR); setC(P.head,[110,120]);
+    const arm=(s,sg)=>{ const a=p.a*R, e=add(s,[sg*-Math.sin(a)*L.ua,-Math.cos(a)*L.ua]), b=(p.a-p.eb)*R, h=add(e,[sg*-Math.sin(b)*L.fa,-Math.cos(b)*L.fa]); return [e,h]; };
+    const [eL,hL]=arm(sL,1), [eR,hR]=arm(sR,-1);
+    setLine(P.arms[0],sL,eL); setLine(P.arms[1],eL,hL); setLine(P.arms[2],sR,eR); setLine(P.arms[3],eR,hR);
+    setC(P.hands[0],hL); setC(P.hands[1],hR); setLine(P.levers[0],[110,58],hL); setLine(P.levers[1],[110,58],hR);
+    return;
+  }
   if(an.view==="front"){
     const cx=110, hinge=!!an.hinge;
     const shY=hinge?98:70, hipY=hinge?104:118, kneeY=hinge?138:145;
@@ -457,18 +658,24 @@ function drawPose(p){
     setC(P.head,hinge?[cx,shY+12]:[cx,shY-20]);
     const kL=[cx-11,kneeY],kR=[cx+11,kneeY],aL=[cx-11,ANK],aR=[cx+11,ANK];
     setLine(P.legs[0],hL,kL); setLine(P.legs[1],kL,aL); setLine(P.legs[2],hR,kR); setLine(P.legs[3],kR,aR);
-    const eL=add(sL,dir(-p.la,L.ua)), wL=add(eL,dir(-p.la+p.eb,L.fa)), eR=add(sR,dir(p.la,L.ua)), wR=add(eR,dir(p.la-p.eb,L.fa));
+    const la2=p.la2!=null?p.la2:p.la, eb2=p.la2!=null?0:p.eb;
+    const eL=add(sL,dir(-p.la,L.ua)), wL=add(eL,dir(-p.la+p.eb,L.fa)), eR=add(sR,dir(la2,L.ua)), wR=add(eR,dir(la2-eb2,L.fa));
     setLine(P.arms[0],sL,eL); setLine(P.arms[1],eL,wL); setLine(P.arms[2],sR,eR); setLine(P.arms[3],eR,wR);
-    P.dbs[0].setAttribute("x",(wL[0]-8).toFixed(1)); P.dbs[0].setAttribute("y",(wL[1]-4).toFixed(1));
-    P.dbs[1].setAttribute("x",(wR[0]-8).toFixed(1)); P.dbs[1].setAttribute("y",(wR[1]-4).toFixed(1));
+    if(P.dbs.length){ P.dbs[0].setAttribute("x",(wL[0]-8).toFixed(1)); P.dbs[0].setAttribute("y",(wL[1]-4).toFixed(1));
+      P.dbs[1].setAttribute("x",(wR[0]-8).toFixed(1)); P.dbs[1].setAttribute("y",(wR[1]-4).toFixed(1)); }
+    if(an.fx){ P.fx2.replaceChildren(); shapes(P.fx2,an.fx({wL,wR})); }
     return;
   }
   const k=fk(p,an);
+  if(an.fx){ P.fx.replaceChildren(); shapes(P.fx,an.fx(k)); }
   setLine(P.farLeg[0],k.hip,k.knee2); setLine(P.farLeg[1],k.knee2,k.ank2); setLine(P.farLeg[2],k.ank2,k.toe2);
-  setLine(P.farArm[0],k.sh,k.el2); setLine(P.farArm[1],k.el2,k.hd2); if(P.farDB) setC(P.farDB,k.hd2);
-  setLine(P.torso,k.hip,k.sh); setC(P.head,k.head);
+  setLine(P.farArm[0],k.sh,k.el2); setLine(P.farArm[1],k.el2,k.hd2); if(P.farDB) setC(P.farDB,k.hd2); if(P.farKB) setKB(P.farKB,k.el2,k.hd2,an.goblet);
+  if(P.plate){ const c=an.plateHip?add(k.hip,[0,-11]):k.hd; setC(P.plate,c); setC(P.hub,c); }
+  const c=add([(k.hip[0]+k.sh[0])/2,(k.hip[1]+k.sh[1])/2],dir(k.t+90,k.curl*2));
+  P.torso.setAttribute("d","M"+k.hip[0].toFixed(1)+" "+k.hip[1].toFixed(1)+"Q"+c[0].toFixed(1)+" "+c[1].toFixed(1)+" "+k.sh[0].toFixed(1)+" "+k.sh[1].toFixed(1));
+  setC(P.head,k.head);
   setLine(P.nearLeg[0],k.hip,k.knee); setLine(P.nearLeg[1],k.knee,k.ank); setLine(P.nearLeg[2],k.ank,k.toe);
-  setLine(P.nearArm[0],k.sh,k.el); setLine(P.nearArm[1],k.el,k.hd); if(P.nearDB) setC(P.nearDB,k.hd);
+  setLine(P.nearArm[0],k.sh,k.el); setLine(P.nearArm[1],k.el,k.hd); if(P.nearDB) setC(P.nearDB,k.hd); if(P.nearKB) setKB(P.nearKB,k.el,k.hd,an.goblet);
 }
 function loop(now){
   if(animState && animState.playing && animState.svg.isConnected){ const t=now-animState.t0; animState.lastT=t; drawPose(poseAt(animState.anim,t)); }
@@ -482,32 +689,56 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 function go(h){ if(location.hash===h) render(); else location.hash=h; }
 const FOOT='<p class="foot">General fitness information, not medical advice. Stop if anything hurts.</p>';
 
+/* Home / Gym pill: nothing preselected for a new session; locked to the session's mode while one is in progress */
+let pickMode=null;
+function modePill(s){
+  const sel=s?s.mode:pickMode, last=lastMode();
+  return '<div class="pill'+(s?' locked':'')+'" id="modePill" role="group" aria-label="Where are you training today?">'+
+    Object.keys(MODES).map(m=>'<button type="button" data-mode="'+m+'" aria-pressed="'+(sel===m)+'"'+(sel===m?' class="on"':'')+(s?' aria-disabled="true"':'')+'>'+MODES[m]+'</button>').join("")+'</div>'+
+    '<div class="modehint" id="modeHint">'+(s?'Locked for this workout':(last?'Last time: '+MODES[last]:''))+'</div>';
+}
+function startBtn(s){ const off=!s&&!pickMode;
+  return '<button class="start'+(off?' off':'')+'" id="startBtn" aria-disabled="'+off+'"'+(off?' aria-describedby="pickHint"':'')+'>'+(s?"Resume":"Start")+'</button>'+
+    (off?'<div class="pickhint" id="pickHint">Pick Home or Gym</div>':''); }
+function wireModeStart(s){
+  app.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>{ if(current()) return; pickMode=b.dataset.mode; render(); });
+  $("startBtn").onclick=()=>{ const cur=current();
+    if(!cur&&!pickMode){ const h=$("pickHint"); if(h){ h.classList.remove("nudge"); void h.offsetWidth; h.classList.add("nudge"); } return; }
+    unlockAudio(); startSession(cur?cur.mode:pickMode); pickMode=null; go("#/go"); };
+}
 function viewHome(){
-  const s=current(); const day=s?s.day:nextDay(); const n=DAYS[day].length;
+  const s=current(); const day=s?s.day:nextDay(); const mode=s?s.mode:pickMode;
   const ramp=s?s.ramp:rampActive();
-  let line2="Today: Day "+day+" · "+n+" exercises";
+  let line2="Today: Day "+day;
+  if(mode) line2+=" · "+MODES[mode]+" · "+PLANS[mode][day].length+" exercises";
   if(s){ const c=counts(s); line2+=" · "+c.d+" of "+c.t+" sets done"; }
   app.innerHTML='<div class="home">'+
     '<div class="brand">Workout Form Guide</div>'+
-    '<button class="start" id="startBtn">'+(s?"Resume":"Start")+'</button>'+
+    modePill(s)+startBtn(s)+
     '<div class="today" id="todayLine">'+esc(line2)+'</div>'+
     (ramp?'<div class="ramp" id="rampLine">Weeks 1–2: 2 sets</div>':'')+
     (s?'<button class="linkbtn small" id="restartBtn">Start this workout over</button>':'')+
     '<div class="links"><a href="#/about" id="aboutLink">About the plan</a>'+FOOT+'</div></div>';
-  $("startBtn").onclick=()=>{ unlockAudio(); startSession(); go("#/go"); };
-  if(s) $("restartBtn").onclick=()=>{ if(confirm("Clear today's checked sets and start this workout over?")){ cancelRest(false); store.del(s.key); store.del("wfg:current"); render(); } };
+  wireModeStart(s);
+  if(s) $("restartBtn").onclick=()=>{ if(confirm("Clear today's checked sets and start this workout over?")){ cancelRest(false); store.del(s.key); store.del("wfg:current"); pickMode=null; render(); } };
 }
 
-function exBody(id,it,s,i){
-  const ex=EX[id]; const items=s?DAYS[s.day]:null;
+function exBody(id,it,s,i,mode){
+  const ex=EX[id]; const items=s?itemsOf(s):null;
   let ssNote="";
-  if(it&&it.ss){ const partner=EX[items[it.ss===1?i+1:i-1].id].name;
-    ssNote='<div class="ss" id="ssNote"><b>Superset '+(it.ss===1?'5a':'5b')+'</b> with '+esc(partner)+': '+(it.ss===1?'do a set, then go straight to triceps (it opens automatically). No rest in between.':'do a set right after the curls, then rest 60–90 s. The next round of curls opens after the rest.')+'</div>'; }
-  const rx = it ? '<div class="rx">'+(it.tag?'<span class="muted">'+it.tag+' · </span>':'')+esc(rxText(it,s?s.sets[i].length:it.sets))+(it.side?' <span class="muted">'+esc(it.side)+'</span>':'')+' <span class="muted">· rest 60–90 s</span></div>'+(it.note?'<div class="daynote" id="dayNote">'+esc(it.note)+'</div>':'') : '';
+  if(it&&it.ss&&items){ const p=items[it.ss===1?i+1:i-1], partner=EX[p.id].name;
+    ssNote='<div class="ss" id="ssNote"><b>Superset '+it.tag+'</b> with '+esc(partner)+': '+(it.ss===1?'do a set, then go straight to '+esc(partner)+' (it opens automatically). No rest in between.':'do a set right after '+esc(partner)+', then rest '+fmtRest(restFor(mode,it))+'. The next round of '+esc(partner)+' opens after the rest.')+'</div>'; }
+  const rest=it?restFor(mode,it):0;
+  const tags=it?[it.kb?'<span class="tag kb" id="kbTag">⭐ Kettlebell works best</span>':'',it.fail?'<span class="tag fail" id="failTag">Last set can go to failure</span>':''].join(""):"";
+  const rx = it ? '<div class="rx">'+(it.tag?'<span class="muted">'+it.tag+' · </span>':'')+esc(rxText(it,s?s.sets[i].length:it.sets))+(it.side?' <span class="muted">'+esc(it.side)+'</span>':'')+' <span class="muted" id="restInfo">· rest '+fmtRest(rest)+'</span></div>'+
+    (tags?'<div class="tags">'+tags+'</div>':'')+(it.note?'<div class="daynote" id="dayNote">'+esc(it.note)+'</div>':'') : '';
   let setsHtml="";
   if(s){
+    if(!ex.bw){ const last=weights(s.mode)[id];
+      setsHtml+='<div class="wt"><label for="wt">'+esc(ex.wLabel||"Weight")+' (lb)</label><input id="wt" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" placeholder="lb" maxlength="6" value="'+esc(last||"")+'">'+
+        '<span class="hint" id="wtHint">'+(last?'Last time: '+esc(last)+' lb':(it&&it.start?'Suggested start: '+esc(it.start):''))+'</span></div>'; }
     const arr=s.sets[i], nu=nextUnchecked(s,i), dn=arr.filter(x=>x.d).length;
-    setsHtml='<div class="sets-head"><b>Sets</b><span id="setCount" class="muted">'+dn+'/'+arr.length+' sets</span></div><div class="sets">'+
+    setsHtml+='<div class="sets-head"><b>Sets</b><span id="setCount" class="muted">'+dn+'/'+arr.length+' sets</span></div><div class="sets">'+
       arr.map((x,j)=>'<div class="set"><button class="box'+(x.d?' on':'')+(j===nu?' next':'')+'" data-set="'+j+'" aria-pressed="'+x.d+'" aria-label="Set '+(j+1)+'"><span class="ck">'+(x.d?'✓':'')+'</span>Set '+(j+1)+'</button>'+
         '<input type="number" inputmode="numeric" min="0" max="99" placeholder="reps" aria-label="Reps done set '+(j+1)+'" data-reps="'+j+'" value="'+esc(x.r)+'"></div>').join("")+'</div>';
   }
@@ -520,17 +751,18 @@ function exBody(id,it,s,i){
 
 function viewWorkout(){
   const s=current(); if(!s){ go("#/"); return; }
-  const items=DAYS[s.day]; const i=Math.min(s.idx,items.length-1); const it=items[i]; const c=counts(s);
+  const items=itemsOf(s); const i=Math.min(s.idx,items.length-1); const it=items[i]; const c=counts(s);
   app.innerHTML='<div class="top"><div class="top-in"><button class="x" id="homeBtn" aria-label="Home">✕</button><div class="meta">'+
-    '<div class="row"><span id="exPos">Day '+s.day+' · Exercise '+(i+1)+' of '+items.length+'</span><span id="dayProg">'+c.d+' of '+c.t+' sets</span></div>'+
+    '<div class="row"><span id="exPos">Day '+s.day+' · '+MODES[s.mode]+' · '+(i+1)+' of '+items.length+'</span><span id="dayProg">'+c.d+' of '+c.t+' sets</span></div>'+
     '<div class="bar"><i id="dayBar" style="width:'+(c.t?c.d/c.t*100:0)+'%"></i></div></div></div></div>'+
-    '<div class="ex">'+exBody(it.id,it,s,i)+FOOT+'</div>'+
+    '<div class="ex">'+exBody(it.id,it,s,i,s.mode)+FOOT+'</div>'+
     '<div class="bottom"><div class="bottom-in"><button class="btn ghost" id="backBtn"'+(i===0?' disabled':'')+'>Back</button>'+
     '<button class="btn primary" id="nextBtn">'+(i===items.length-1?'Finish':'Next')+'</button></div></div>';
   mountFigure($("anim"),it.id);
   $("homeBtn").onclick=()=>go("#/");
-  $("backBtn").onclick=()=>{ cancelRest(false); s.idx=Math.max(0,i-1); save(s); render(); window.scrollTo(0,0); };
-  $("nextBtn").onclick=()=>{ cancelRest(false); if(i===items.length-1){ finish(s); return; } s.idx=i+1; save(s); render(); window.scrollTo(0,0); };
+  const fresh=()=>{ const cur=current()||s; app.querySelectorAll("[data-reps]").forEach(inp=>{ const x=cur.sets[i]&&cur.sets[i][+inp.dataset.reps]; if(x) x.r=inp.value.slice(0,3); }); return cur; };
+  $("backBtn").onclick=()=>{ cancelRest(false); const cur=fresh(); cur.idx=Math.max(0,i-1); save(cur); render(); window.scrollTo(0,0); };
+  $("nextBtn").onclick=()=>{ cancelRest(false); if(i===items.length-1){ finish(fresh()); return; } const cur=fresh(); cur.idx=i+1; save(cur); render(); window.scrollTo(0,0); };
   app.querySelectorAll("[data-set]").forEach(b=>b.onclick=()=>{
     unlockAudio();
     const j=+b.dataset.set, ss=current(); if(!ss) return; const x=ss.sets[i][j];
@@ -543,9 +775,11 @@ function viewWorkout(){
     let label;
     if(tg.type==="set") label="Next: "+EX[items[tg.i].id].name+" — set "+(nextUnchecked(ss,tg.i)+1);
     else label="Next: "+EX[items[tg.i].id].name+(items[tg.i].ss&&tg.i<i?" — next round":"");
-    startRest(ss,tg,label);
+    startRest(ss,tg,label,it);
   });
   app.querySelectorAll("[data-reps]").forEach(inp=>inp.oninput=()=>{ const ss=current(); if(!ss) return; ss.sets[i][+inp.dataset.reps].r=inp.value.slice(0,3); save(ss); });
+  const wt=$("wt");
+  if(wt) wt.oninput=()=>{ const v=wt.value.replace(",",".").replace(/[^0-9.]/g,"").replace(/(\..*)\./g,"$1").slice(0,6); if(v!==wt.value) wt.value=v; setWeight(s.mode,it.id,v); };
   if(it.hold) wireHold(it.hold);
   if(s.rest) showRest();
 }
@@ -566,28 +800,35 @@ function viewDone(){
   const last=store.get("wfg:last");
   if(!last){ go("#/"); return; }
   app.innerHTML='<div class="wrap done"><div class="big">✅</div><h1 id="doneTitle">Day '+last.day+' done — '+last.done+' of '+last.total+' sets</h1>'+
-    '<p class="muted">Next time: Day '+nextDay()+'</p><div style="height:20px"></div>'+
+    '<p class="muted">'+(MODES[last.mode]?MODES[last.mode]+' workout. ':'')+'Next time: Day '+nextDay()+'</p><div style="height:20px"></div>'+
     '<button class="btn primary" id="homeBtn" style="width:100%;max-width:360px">Back to home</button>'+
     '<p style="margin-top:28px"><a href="#/about">About the plan</a></p>'+FOOT+'</div>';
   $("homeBtn").onclick=()=>go("#/");
 }
 
+function planCards(mode){
+  return '<div class="about-grid">'+Object.keys(PLANS[mode]).map(d=>{ const items=PLANS[mode][d], ss=items.find(x=>x.ss===1);
+    return '<div class="card day"><h2><span>Day '+d+'</span><span class="muted small">'+planSets(mode,d,false)+' sets'+(ss?'*':'')+'</span></h2><ul class="plan-list">'+
+    items.map((it,j)=>{ const n=j+1-items.slice(0,j).filter(x=>x.ss===2).length;
+      const sub=[it.ss===1?'superset with '+it.tag.replace("a","b")+', no rest between':it.ss===2?'rest after this one':'',it.side,it.note,'rest '+fmtRest(it.rest),it.fail?'last set can go to failure':''].filter(Boolean).join(' · ');
+      return '<li><div><a href="#/ex/'+mode+'/'+d+'/'+j+'">'+(it.tag||n)+'. '+esc(EX[it.id].name)+(it.kb?' ⭐':'')+'</a><div class="muted small">'+esc(sub)+'</div></div><span class="muted">'+esc(it.repsText?it.sets+' sets':it.sets+' × '+it.reps)+'</span></li>'; }).join("")+
+    (ss?'<li class="muted small" style="display:block">*Each '+ss.tag+' + '+ss.tag.replace("a","b")+' round counts as one set.</li>':'')+'</ul></div>'; }).join("")+'</div>';
+}
 function viewAbout(){
   const ramp=rampActive();
   app.innerHTML='<div class="wrap about"><p><a href="#/" id="backHome">← Home</a></p><h1>About the plan</h1>'+
-    '<p class="muted">3-day full-body dumbbell plan. Rotate Day A → B → C. Tap any exercise to see its form guide.'+(ramp?' <b>You are in weeks 1–2: 2 sets of everything.</b>':'')+'</p>'+
-    '<div class="about-grid">'+Object.keys(DAYS).map(d=>'<div class="card day"><h2><span>Day '+d+'</span><span class="muted small">'+planSets(d,false)+' sets'+(DAYS[d].some(x=>x.ss)?'*':'')+'</span></h2><ul class="plan-list">'+
-      DAYS[d].map((it,j)=>'<li><div><a href="#/ex/'+d+'/'+j+'">'+(it.tag?it.tag+'. ':(j+1-(DAYS[d].slice(0,j).some(x=>x.ss===2)?1:0))+'. ')+esc(EX[it.id].name)+'</a>'+(it.note||it.side||it.ss?'<div class="muted small">'+esc([it.ss===1?'superset with 5b, no rest between':it.ss===2?'rest after this one':'',it.side,it.note].filter(Boolean).join(' · '))+'</div>':'')+'</div><span class="muted">'+esc(it.repsText?it.sets+' sets':it.sets+' × '+it.reps)+'</span></li>').join("")+
-      (DAYS[d].some(x=>x.ss)?'<li class="muted small" style="display:block">*Each 5a + 5b round counts as one set.</li>':'')+'</ul></div>').join("")+'</div>'+
+    '<p class="muted">3-day full-body plan with a Home version and a Gym version. Pick Home or Gym on the home screen; the day rotates A → B → C either way. Tap any exercise to see its form guide.'+(ramp?' <b>You are in weeks 1–2: 2 sets of everything.</b>':'')+'</p>'+
+    '<h2 class="sec" id="homePlan">At home</h2><p class="muted small">'+esc(EQUIP)+'</p>'+planCards("home")+
+    '<h2 class="sec" id="gymPlan">Gym</h2>'+planCards("gym")+
     '<div class="card"><h2>Rules</h2><ul>'+RULES.map(r=>'<li>'+esc(r)+'</li>').join("")+'</ul></div>'+FOOT+'</div>';
 }
 
 function viewExercise(ref){
-  let id=ref, it=null; const m=ref.match(/^([ABC])\/(\d+)$/);
-  if(m&&DAYS[m[1]][+m[2]]){ it=DAYS[m[1]][+m[2]]; id=it.id; }
-  else { for(const d in DAYS){ const f=DAYS[d].find(x=>x.id===id); if(f){ it=f; break; } } }
+  let id=ref, it=null, mode="home"; const m=ref.match(/^(home|gym)\/([ABC])\/(\d+)$/);
+  if(m&&PLANS[m[1]][m[2]][+m[3]]){ mode=m[1]; it=PLANS[mode][m[2]][+m[3]]; id=it.id; }
+  else { outer: for(const md in PLANS) for(const d in PLANS[md]){ const f=PLANS[md][d].find(x=>x.id===id); if(f){ it=f; mode=md; break outer; } } }
   if(!EX[id]){ go("#/about"); return; }
-  app.innerHTML='<div class="ex"><p><a href="#/about">← About the plan</a></p>'+exBody(id,it?{...it,ss:0}:null,null,0)+FOOT+'</div>';
+  app.innerHTML='<div class="ex"><p><a href="#/about">← About the plan</a></p>'+exBody(id,it?{...it,ss:0,tag:""}:null,null,0,mode)+FOOT+'</div>';
   mountFigure($("anim"),id);
 }
 
@@ -604,6 +845,7 @@ function render(){
 }
 window.addEventListener("hashchange",()=>{ render(); window.scrollTo(0,0); });
 render();
+
 </script>
 </body>
 </html>
