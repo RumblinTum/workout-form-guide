@@ -136,6 +136,8 @@ h2.sec{font-size:22px;margin:22px 0 2px}
 .rest .ctl button.skip{flex:1.6}
 .rest button{height:68px;min-width:0;padding:0 8px;border-radius:16px;border:0;font-size:20px;font-weight:700;background:rgba(255,255,255,.14);color:#fff}
 .rest button.skip{background:#2563eb;min-width:136px}
+.goflash{position:fixed;inset:0;z-index:40;background:#facc15;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.goflash b{font-size:clamp(80px,24vw,180px);font-weight:900;color:#111;letter-spacing:.04em}
 
 /* Done */
 .done{text-align:center;padding-top:12vh}
@@ -180,31 +182,31 @@ h2.sec{font-size:22px;margin:22px 0 2px}
 /* ============ PLAN DATA (edit here) ============ */
 /* bw: no weight field; wLabel: custom weight label */
 const EX = {
-  "goblet-squat": {name:"Goblet Squat", note:"Holding the kettlebell by the horns works best.", cues:["Hold the kettlebell (or one dumbbell) at your chest, elbows tucked.","Feet shoulder-width, toes slightly out.","Take a slow 3 seconds to sit hips down and back between your heels; chest stays up.","Drive through the whole foot to stand tall."], mistakes:["Dropping fast instead of a 3-second lowering","Heels lifting off the floor","Knees caving inward"]},
+  "goblet-squat": {name:"Goblet Squat", note:"Holding the kettlebell by the horns works best.", cues:["Hold the kettlebell (or one dumbbell) at your chest, elbows tucked.","Feet shoulder-width, toes slightly out.","Take a slow 3 seconds to sit your hips straight down between your feet; chest stays up.","Drive through the whole foot to stand tall."], mistakes:["Dropping fast instead of a 3-second lowering","Heels lifting off the floor","Knees caving inward"]},
   "goblet-squat-pause": {name:"Paused Goblet Squat", note:"Holding the kettlebell by the horns works best.", cues:["Hold the kettlebell (or one dumbbell) at your chest, elbows tucked.","Sit down between your heels, chest up.","Hold the bottom for a full 2 seconds, staying tight.","Drive up through the whole foot."], mistakes:["Relaxing or bouncing out of the pause","Heels lifting off the floor","Knees caving inward"]},
-  "db-bench": {name:"Dumbbell Bench Press", note:"No bench? Do it lying on the floor (floor press).", cues:["Lie back, feet flat, shoulder blades squeezed together.","Start with dumbbells over your chest, arms straight.","Lower slowly until elbows are just below the bench, about 45° from your body.","Press up and slightly together."], mistakes:["Elbows flared straight out at 90°","Bouncing the weights off your chest","Lifting hips off the bench"]},
-  "db-floor-press": {name:"Dumbbell Floor Press", cues:["Lie on the floor, knees bent, feet flat.","Start with dumbbells over your chest, arms straight.","Lower until your upper arms lightly touch the floor, elbows about 45° from your body.","Pause for a beat, then press back up."], mistakes:["Slamming the elbows into the floor","Elbows flared straight out","Wrists bent back"]},
+  "db-bench": {name:"Dumbbell Bench Press", note:"No bench? Do it lying on the floor (floor press).", cues:["Lie back, feet flat, shoulder blades squeezed together.","Start with dumbbells over your chest, arms straight.","Lower until your upper arms are about level with your body and you feel a mild chest stretch. Stop if the front of your shoulder pinches.","Press up and slightly together."], mistakes:["Elbows flared straight out at 90°","Bouncing the weights off your chest","Lifting hips off the bench"]},
+  "db-floor-press": {name:"Dumbbell Floor Press", cues:["Lie on the floor, knees bent, feet flat.","Start with dumbbells over your chest, arms straight.","Lower until your upper arms rest on the floor.","Pause for a beat, then press back up."], mistakes:["Slamming the elbows into the floor","Elbows flared straight out","Wrists bent back"]},
   "one-arm-row": {name:"One-Arm Dumbbell Row", cues:["Brace one hand on a bench or sturdy surface; back flat.","Let the dumbbell hang straight down.","Pull your elbow back toward your hip.","Lower under control to a full stretch."], mistakes:["Twisting the torso to heave the weight","Shrugging toward the ear","Rounded back"]},
-  "rdl": {name:"Dumbbell Romanian Deadlift", cues:["Stand tall, dumbbells in front of thighs, soft knees.","Hip hinge: push hips straight back; dumbbells slide down close to your legs.","Keep a flat back; stop at a strong hamstring stretch (about mid-shin).","Squeeze glutes to stand back up."], mistakes:["Rounding the back","Turning it into a squat (knees bending a lot)","Letting the weights drift away from your legs"]},
+  "rdl": {name:"Dumbbell Romanian Deadlift", cues:["Stand tall, dumbbells in front of thighs, soft knees.","Hip hinge: push hips straight back; dumbbells slide down close to your legs.","Stop when your back is about to round, usually just below the knee. Depth comes as your hamstrings loosen up.","Squeeze glutes to stand back up."], mistakes:["Rounding the back","Turning it into a squat (knees bending a lot)","Letting the weights drift away from your legs"]},
   "lateral-raise": {name:"Lateral Raise", cues:["Stand tall, dumbbells at your sides, slight bend in elbows.","Raise arms out to the sides to shoulder height.","Lead with the elbows; hands no higher than elbows.","Lower slowly over 2–3 seconds."], mistakes:["Swinging or shrugging","Lifting above shoulder height","Going too heavy"]},
   "plank": {name:"Plank", bw:1, cues:["Forearms on the floor, elbows under shoulders.","Straight line from head to heels; squeeze glutes and brace abs.","Tuck ribs down slightly and look at the floor.","Breathe steadily through the hold."], mistakes:["Hips sagging","Hips piked up high","Holding your breath"]},
-  "split-squat": {name:"Split Squat", cues:["Long staggered stance, dumbbells at your sides, torso tall.","Lower straight down until the back knee nearly touches the floor.","Front shin stays about vertical; weight in the front heel.","Drive through the front foot to rise."], mistakes:["Stance too short (front heel lifts)","Front knee caving in","Leaning far forward"]},
-  "seated-oh-press": {name:"Seated Dumbbell Overhead Press", cues:["Sit on a bench (back pad upright if you have one), feet planted.","Dumbbells at shoulder height, wrists stacked over elbows.","Brace and press straight up until arms lock out overhead.","Lower under control back to shoulder height."], mistakes:["Arching the lower back off the pad","Pressing forward instead of straight up","Half reps"]},
+  "split-squat": {name:"Split Squat", cues:["Long staggered stance, dumbbells at your sides, torso tall.","Lower straight down until the back knee nearly touches the floor.","Front shin stays about vertical; weight across your whole front foot.","Drive through the whole front foot to rise."], mistakes:["Stance too short (front heel lifts)","Front knee caving in","Leaning far forward"]},
+  "seated-oh-press": {name:"Seated Dumbbell Overhead Press", cues:["Sit on a bench (back pad upright if you have one), feet planted.","Rest the dumbbells on your thighs and kick them up to your shoulders one knee at a time, then reverse that to set them down.","Dumbbells at shoulder height, wrists stacked over elbows.","Brace and press straight up until arms lock out overhead.","Lower under control back to shoulder height."], mistakes:["Arching the lower back off the pad","Pressing forward instead of straight up","Half reps"]},
   "chest-supported-row": {name:"Chest-Supported Incline Row", note:"Lie face down on a bench set to an incline (about 30–45°).", cues:["Chest on the pad, feet on the floor, arms hanging straight down.","Row both elbows back toward your hips.","Squeeze shoulder blades together for a beat at the top.","Lower slowly to a full stretch."], mistakes:["Lifting your chest off the pad to heave","Shrugging toward the ears","Cutting the stretch short"]},
-  "sl-rdl": {name:"Single-Leg Romanian Deadlift", note:"Hold the kettlebell in the hand opposite your standing leg.", cues:["Kettlebell in the hand opposite your standing leg.","Soft knee on the standing leg; hinge at the hip.","Back leg rises as your chest lowers: one straight line from head to heel.","Keep hips square to the floor; squeeze the glute to stand."], mistakes:["Rounding the back","Hip rotating open toward the ceiling","Locking the standing knee"]},
+  "sl-rdl": {name:"Single-Leg Romanian Deadlift", note:"Hold the kettlebell in the hand opposite your standing leg.", cues:["Hold a rack or wall for balance.","Kettlebell in the hand opposite your standing leg.","Soft knee on the standing leg; hinge at the hip.","Back leg rises as your chest lowers: one straight line from head to heel.","Keep hips square to the floor; squeeze the glute to stand."], mistakes:["Rounding the back","Hip rotating open toward the ceiling","Locking the standing knee"]},
   "db-curl": {name:"Dumbbell Curl", cues:["Stand tall, palms forward, elbows pinned at your sides.","Curl up until forearms are vertical.","Squeeze, then lower slowly (2–3 seconds).","Fully straighten at the bottom."], mistakes:["Swinging with the hips or back","Elbows drifting forward","Half reps"]},
-  "oh-triceps": {name:"Overhead Triceps Extension", cues:["Hold one dumbbell overhead with both hands.","Keep elbows pointing up and close to your head.","Lower the weight behind your head by bending only the elbows.","Straighten arms fully to the top."], mistakes:["Elbows flaring wide","Arching the lower back (brace your abs)","Moving the upper arms"]},
+  "oh-triceps": {name:"Overhead Triceps Extension", cues:["Hold one dumbbell overhead with both hands.","Cup the top of the dumbbell with both palms, thumbs wrapped.","Keep elbows pointing up and close to your head.","Lower the weight behind your head by bending only the elbows.","Straighten arms fully to the top.","Go lighter than you'd guess, since control matters more than weight here."], mistakes:["Elbows flaring wide","Arching the lower back (brace your abs)","Moving the upper arms"]},
   "farmer-carry": {name:"Farmer Carry", cues:["Pick up heavy weights with a flat back.","Stand tall, shoulders back and down, arms straight.","Walk with short, controlled steps; brace your abs.","Set them down with a flat back."], mistakes:["Leaning to one side or shrugging","Letting the weights swing","Rounding the back to pick up or set down"]},
   "push-up": {name:"Push-Up", bw:1, note:"Hands up on a bench if needed to get good-form reps. To progress, put your feet on the bench.", cues:["Hands slightly wider than shoulders; body in one straight line.","Lower your chest toward the floor, elbows about 45° from your body.","Push the floor away until arms are straight.","End each set about 2 reps before failure."], mistakes:["Hips sagging or piking up","Elbows flared straight out","Half reps or head dropping"]},
   "kb-swing": {name:"Kettlebell Swing", note:"A hip hinge, not a squat and not an arm lift.", cues:["Feet a bit wider than shoulders, bell about a foot in front of you.","Hike the bell back between your legs by pushing your hips back, flat back, soft knees.","Snap your hips forward and squeeze your glutes; the bell floats up to about chest height.","Let it fall back into the next hinge; arms stay long and relaxed."], mistakes:["Squatting down instead of hinging","Lifting the bell with your arms","Leaning back at the top"]},
   "step-up": {name:"Step-Up", cues:["Use a sturdy box or bench, knee height or lower.","Put your whole foot on the box.","Drive through that heel to stand tall on top.","Step down slowly; finish one leg, then switch."], mistakes:["Pushing off the back foot","Front knee caving in","Dropping down fast"]},
-  "rear-delt-fly": {name:"Rear-Delt Fly", cues:["Hinge forward until your torso is nearly parallel to the floor, back flat.","Light dumbbells hang under your shoulders, palms in, elbows slightly bent.","Raise arms out to the sides to shoulder height, leading with the back of the shoulders.","Lower slowly."], mistakes:["Going heavy and swinging","Shrugging the shoulders","Standing up as you lift"]},
+  "rear-delt-fly": {name:"Rear-Delt Fly", note:"Easier on your back: lie chest-down on the bench at 30° and do the fly from there.", cues:["Hinge forward until your torso is nearly parallel to the floor, back flat.","Light dumbbells hang under your shoulders, palms in, elbows slightly bent.","Raise arms out to the sides to shoulder height, leading with the back of the shoulders.","Lower slowly."], mistakes:["Going heavy and swinging","Shrugging the shoulders","Standing up as you lift"]},
   "dead-bug": {name:"Dead Bug", bw:1, cues:["Lie on your back, arms straight up, hips and knees bent 90° (tabletop).","Press your lower back gently into the floor.","Slowly reach one arm overhead while straightening the opposite leg, hovering just off the floor.","Return and switch sides; breathe out as you reach."], mistakes:["Lower back arching off the floor","Rushing the reps","Moving the same-side arm and leg"]},
   /* ---- gym ---- */
   "bb-squat": {name:"Barbell Back Squat", note:"Squat in a rack with the safety arms set just below your bottom position.", cues:["Bar across your upper back (on the muscle, not your neck), hands just outside shoulders, elbows down.","Feet shoulder-width, toes slightly out; take a big breath and brace before each rep.","Sit hips down and back, knees tracking over your toes, until thighs are about parallel.","Drive up through the whole foot, keeping the bar over the middle of your foot."], mistakes:["Heels lifting or weight shifting to the toes","Knees caving inward","Hips shooting up first so the chest drops"]},
   "bb-bench": {name:"Barbell Bench Press", note:"Use the rack's safety arms (set just below chest height) or a spotter.", cues:["Eyes under the bar, feet flat, shoulder blades squeezed and pinned.","Grip a bit wider than shoulders, wrists stacked over elbows.","Lower the bar under control to your lower chest, elbows about 45° from your body.","Press up and slightly back over your shoulders."], mistakes:["Bouncing the bar off your chest","Elbows flared straight out to 90°","Hips lifting off the bench"]},
   "cable-row": {name:"Seated Cable Row", cues:["Sit tall, feet on the platform, knees slightly bent.","Start with arms long and shoulders reaching forward a little.","Pull the handle to your belly, driving your elbows back, chest up.","Pause, then let your arms straighten slowly."], mistakes:["Rocking your torso back and forth to move the weight","Shrugging toward the ears","Rounding the lower back"]},
-  "bb-rdl": {name:"Barbell Romanian Deadlift", cues:["Stand tall, bar at your hips, hands just outside your thighs, soft knees.","Push hips straight back; slide the bar down your thighs, close to your legs.","Keep a flat back; stop at a strong hamstring stretch (around knee to mid-shin).","Squeeze your glutes to stand tall; don't lean back at the top."], mistakes:["Rounding the back","Bar drifting away from your legs","Bending the knees into a squat"]},
+  "bb-rdl": {name:"Barbell Romanian Deadlift", cues:["Stand tall, bar at your hips, hands just outside your thighs, soft knees.","Push hips straight back; slide the bar down your thighs, close to your legs.","Stop when your back is about to round, usually just below the knee. Depth comes as your hamstrings loosen up.","Squeeze your glutes to stand tall; don't lean back at the top."], mistakes:["Rounding the back","Bar drifting away from your legs","Bending the knees into a squat"]},
   "cable-lateral-raise": {name:"Cable Lateral Raise", cues:["Stand side-on to a low pulley, handle in the far hand, cable crossing in front of you.","Slight bend in the elbow; hold the machine with your other hand.","Raise your arm out to the side to shoulder height, leading with the elbow.","Lower slowly against the cable's pull."], mistakes:["Leaning away to swing the weight","Shrugging the shoulder","Raising above shoulder height"]},
   "cable-crunch": {name:"Cable Crunch", cues:["Kneel facing a high pulley, rope held beside your head.","Keep your hips still, stacked over your knees.","Curl your ribs toward your hips, rounding your spine, elbows toward your thighs.","Pause, then uncurl slowly."], mistakes:["Sitting your hips back to pull with bodyweight","Pulling with your arms","Rushing the return"]},
   "leg-press": {name:"Leg Press", note:"Set the safety stops before you start.", cues:["Back and hips flat on the pad, feet shoulder-width in the middle of the platform.","Release the safeties; lower the platform under control.","Go as deep as you can while your lower back stays on the pad.","Press through the whole foot; stop just short of locking your knees."], mistakes:["Lower back or hips rolling off the pad at the bottom","Locking the knees hard at the top","Knees caving inward"]},
@@ -212,8 +214,8 @@ const EX = {
   "leg-curl": {name:"Leg Curl (Lying or Seated)", note:"Shown: lying leg curl. The seated machine works the same way.", cues:["Line your knees up with the machine's pivot; pad just above your heels.","Hold the handles and keep your hips pressed down.","Curl your heels toward your glutes.","Lower slowly all the way."], mistakes:["Hips lifting off the pad","Swinging the weight up","Short range at the bottom"]},
   "ez-curl": {name:"EZ-Bar Curl", cues:["Grip the angled part of the bar, elbows pinned at your sides.","Curl up until your forearms are vertical.","Squeeze, then lower slowly (2–3 seconds).","Fully straighten at the bottom."], mistakes:["Swinging with the hips or back","Elbows drifting forward","Half reps"]},
   "cable-pushdown": {name:"Cable Triceps Pushdown", cues:["Stand tall facing a high pulley, rope or bar at chest height.","Pin your elbows at your sides.","Push down until your arms are straight; spread the rope at the bottom.","Let your forearms rise slowly to just above parallel."], mistakes:["Elbows drifting forward or flaring","Leaning over the weight","Shoulders rolling forward"]},
-  "hack-squat": {name:"Hack Squat", note:"No hack squat machine? Do dumbbell Bulgarian split squats (rear foot on a bench) instead.", cues:["Back and shoulders flat against the pads, feet shoulder-width in the middle of the platform.","Release the safeties and lower under control.","Go down until your thighs are about parallel to the platform.","Drive up through the whole foot; don't lock out hard."], mistakes:["Heels lifting","Knees caving in","Hips coming off the pad"]},
-  "incline-db-press": {name:"Incline Dumbbell Press", cues:["Set the bench to about 30°; sit back with shoulder blades pinched.","Start with the dumbbells over your upper chest, arms straight.","Lower slowly until your elbows are just below the bench, about 45° from your body.","Press up and slightly together."], mistakes:["Bench set too steep (it turns into a shoulder press)","Elbows flared straight out","Bouncing at the bottom"]},
+  "hack-squat": {name:"Hack Squat", note:"No hack squat machine? Do dumbbell Bulgarian split squats (rear foot on a bench) instead.", cues:["Back and shoulders flat against the pads, feet shoulder-width in the middle of the platform.","Release the safeties and lower under control.","Go down until your thighs are parallel to the floor.","Drive up through the whole foot; don't lock out hard."], mistakes:["Heels lifting","Knees caving in","Hips coming off the pad"]},
+  "incline-db-press": {name:"Incline Dumbbell Press", cues:["Set the bench to about 30°; sit back with shoulder blades pinched.","Start with the dumbbells over your upper chest, arms straight.","Lower until your upper arms are about level with your body and you feel a mild chest stretch. Stop if the front of your shoulder pinches.","Press up and slightly together."], mistakes:["Bench set too steep (it turns into a shoulder press)","Elbows flared straight out","Bouncing at the bottom"]},
   "pull-up": {name:"Pull-Up (or Heavy One-Arm Row)", wLabel:"Assist or row weight", note:"Use the assisted pull-up machine or a band if needed. Can't do pull-ups yet? Do heavy one-arm dumbbell rows instead.", cues:["Hang from the bar, hands a bit wider than shoulders, arms straight.","Pull your shoulders down and back, then drive your elbows down.","Pull until your chin clears the bar.","Lower all the way under control."], mistakes:["Kicking or swinging","Half reps","Shrugging at the top"]},
   "hip-thrust": {name:"Barbell Hip Thrust", note:"Use a bar pad across your hips.", cues:["Upper back against the edge of a bench, bar across your hip crease.","Feet flat, about shoulder-width; shins vertical at the top.","Drive through your heels to lift your hips until your body is a straight line from shoulders to knees.","Keep chin tucked and ribs down; pause and squeeze your glutes."], mistakes:["Arching the lower back at the top","Feet too far out or too close in","Pushing through your toes"]},
   "reverse-pec-deck": {name:"Reverse Pec Deck", cues:["Sit facing the pad, chest against it, handles at shoulder height.","Slight bend in the elbows.","Sweep your arms back until they line up with your body.","Return slowly."], mistakes:["Shrugging","Swinging with the torso","Going too heavy"]},
@@ -271,6 +273,8 @@ const MODES = {home:"Home", gym:"Gym"};
 /* superset labels (5a/5b, 6a/6b) from position */
 for(const m in PLANS) for(const d in PLANS[m]){ let n=0; PLANS[m][d].forEach(it=>{ if(it.ss!==2) n++; if(it.ss) it.tag=n+(it.ss===1?"a":"b"); }); }
 const RULES = [
+  "Warm up first: 5 minutes of easy movement, then one light set of your first exercise.",
+  "Three workouts a week, with at least one day off between them. Muscle gets built on the rest days.",
   "Stop most sets 1–2 reps short of failure (good reps left in the tank).",
   "True failure only on the last set of exercises marked “Last set can go to failure” (safe isolation moves, about 1 set in 10). Never take squats, bench press or Romanian deadlifts to failure without a spotter.",
   "Rest: big lifts 2–3 min at the gym, 90 s at home; small moves 45–75 s. Each exercise's timer starts at its own default; −15 / +15 is remembered for that exercise.",
@@ -489,8 +493,23 @@ function applyTarget(s,tg){
 }
 
 /* ============ REST TIMER (timestamp based, per-exercise default) ============ */
-let restTick=null;
+let restTick=null, wakeLock=null, wakeOn=0;
 const $=id=>document.getElementById(id);
+function keepAwake(on){
+  try{
+    if(!on){ wakeOn=0; const w=wakeLock; wakeLock=null; if(w&&w.release){ try{ const r=w.release(); if(r&&r.catch) r.catch(()=>{}); }catch(e){} } return; }
+    const n=++wakeOn;
+    if(!navigator.wakeLock||!navigator.wakeLock.request) return;
+    navigator.wakeLock.request("screen").then(l=>{ if(n===wakeOn) wakeLock=l; else try{ l.release(); }catch(e){} }).catch(()=>{});
+  }catch(e){}
+}
+function flashGo(){
+  try{
+    const el=document.createElement("div"); el.className="goflash"; el.innerHTML="<b>Go</b>";
+    document.body.appendChild(el);
+    setTimeout(()=>{ try{ el.remove(); }catch(e){} },2000);
+  }catch(e){}
+}
 function fmt(sec){ sec=Math.max(0,Math.ceil(sec)); return Math.floor(sec/60)+":"+pad(sec%60); }
 function startRest(s,tg,label,it){
   const dur=restFor(s.mode,it);
@@ -500,9 +519,10 @@ function startRest(s,tg,label,it){
 function showRest(){
   const s=current(); if(!s||!s.rest){ hideRest(); return; }
   $("rest").classList.add("show"); $("restNext").textContent=s.rest.label||"";
+  keepAwake(true);
   clearInterval(restTick); restTick=setInterval(updateRest,200); updateRest();
 }
-function hideRest(){ $("rest").classList.remove("show"); clearInterval(restTick); restTick=null; }
+function hideRest(){ $("rest").classList.remove("show"); clearInterval(restTick); restTick=null; keepAwake(false); }
 function updateRest(){
   const s=current(); if(!s||!s.rest){ hideRest(); return; }
   const left=(s.rest.end-Date.now())/1000;
@@ -513,7 +533,11 @@ function updateRest(){
 function endRest(withBeep){
   const s=current(); if(!s||!s.rest){ hideRest(); return; }
   const tg=s.rest.tg; delete s.rest; save(s); hideRest();
-  if(withBeep) beep();
+  if(withBeep){
+    beep();
+    try{ if(navigator.vibrate) navigator.vibrate([200,100,200]); }catch(e){}
+    flashGo();
+  }
   applyTarget(s,tg);
 }
 function cancelRest(rerender){ const s=current(); if(s&&s.rest){ delete s.rest; save(s);} hideRest(); if(rerender) render(); }
@@ -526,7 +550,7 @@ function adjustRest(delta){
 $("restSkip").onclick=()=>endRest(false);
 $("restMinus").onclick=()=>adjustRest(-15);
 $("restPlus").onclick=()=>adjustRest(15);
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden) updateRest(); });
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ if(current()&&current().rest) keepAwake(true); updateRest(); } });
 window.addEventListener("focus",updateRest);
 window.addEventListener("pageshow",updateRest);
 
@@ -838,6 +862,43 @@ function planCards(mode){
       return '<li><div><a href="#/ex/'+mode+'/'+d+'/'+j+'">'+(it.tag||n)+'. '+esc(EX[it.id].name)+(it.kb?' ⭐':'')+'</a><div class="muted small">'+esc(sub)+'</div></div><span class="muted">'+esc(it.repsText?it.sets+' sets':it.sets+' × '+it.reps)+'</span></li>'; }).join("")+
     (ss?'<li class="muted small" style="display:block">*Each '+ss.tag+' + '+ss.tag.replace("a","b")+' round counts as one set.</li>':'')+'</ul></div>'; }).join("")+'</div>';
 }
+const BACKUP_PREFIX="wfg-demo-";
+function isAppKey(k){ return typeof k==="string"&&k.indexOf(BACKUP_PREFIX)===0&&(BACKUP_PREFIX===("wfg"+"-demo-")||k.indexOf("wfg"+"-demo-")!==0); }
+function collectBackup(){
+  const data={};
+  try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(isAppKey(k)) data[k]=localStorage.getItem(k); } }catch(e){}
+  return {app:"workout-form-guide",version:BACKUP_PREFIX,exportedAt:today(),data};
+}
+function exportBackup(){
+  try{
+    const obj=collectBackup(), name="workout-backup-"+obj.exportedAt+".json";
+    const blob=new Blob([JSON.stringify(obj)],{type:"application/json"});
+    const go=()=>{ try{ const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; a.click(); setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(e){} },2000); }catch(e){} };
+    if(navigator.share&&navigator.canShare){
+      try{ const f=new File([blob],name,{type:"application/json"});
+        if(navigator.canShare({files:[f]})){ navigator.share({files:[f],title:name}).catch(go); return; }
+      }catch(e){}
+    }
+    go();
+  }catch(e){}
+}
+function importBackup(text){
+  let obj=null;
+  try{ obj=JSON.parse(text); }catch(e){ alert("That file isn't a valid backup."); return; }
+  if(!obj||obj.app!=="workout-form-guide"||obj.version!==BACKUP_PREFIX||!obj.data||typeof obj.data!=="object"||Array.isArray(obj.data)){
+    alert("That backup doesn't match this app."); return;
+  }
+  const keys=Object.keys(obj.data);
+  if(!keys.every(k=>isAppKey(k)&&typeof obj.data[k]==="string")){ alert("That backup doesn't match this app."); return; }
+  if(!confirm("Replace all saved data on this device with this backup?")) return;
+  try{
+    const old=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(isAppKey(k)) old.push(k); }
+    keys.forEach(k=>localStorage.setItem(k,obj.data[k]));
+    old.forEach(k=>{ if(!(k in obj.data)) localStorage.removeItem(k); });
+  }catch(e){ alert("Couldn't import that backup."); return; }
+  render();
+}
+window.__exportBackup=collectBackup;
 function viewAbout(){
   const ramp=rampActive();
   app.innerHTML='<div class="wrap about"><p><a href="#/" id="backHome">← Home</a></p><h1>About the plan</h1>'+
@@ -845,7 +906,12 @@ function viewAbout(){
     '<div class="card"><h2>Rules</h2><ul>'+RULES.map(r=>'<li>'+esc(r)+'</li>').join("")+'</ul></div>'+
     '<h2 class="sec" id="homePlan">At home</h2><p class="muted small">'+esc(EQUIP)+'</p>'+planCards("home")+
     '<h2 class="sec" id="gymPlan">Gym</h2>'+planCards("gym")+
+    '<div class="card"><h2>Your data</h2><p class="muted small">Saved on this device only.</p>'+
+    '<p><button type="button" class="linkbtn" id="exportBtn">Export my data</button></p>'+
+    '<p><label class="linkbtn">Import<input type="file" id="importFile" accept="application/json,.json" hidden></label></p></div>'+
     FOOT+'</div>';
+  $("exportBtn").onclick=()=>exportBackup();
+  $("importFile").onchange=e=>{ const f=e.target.files&&e.target.files[0]; e.target.value=""; if(!f) return; f.text().then(importBackup).catch(()=>alert("Couldn't read that file.")); };
 }
 
 function viewExercise(ref){
