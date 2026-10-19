@@ -118,6 +118,11 @@ h2.sec{font-size:22px;margin:22px 0 2px}
 .hexlist{list-style:none;margin:8px 0 0;padding:0}
 .hexlist li{padding:5px 0;border-top:1px solid var(--line);font-size:15px}
 .hexlist li:first-child{border-top:0}
+.weekrow{display:flex;align-items:flex-end;gap:5px;height:52px;margin:8px 0 4px;width:100%}
+.weekrow i{flex:1;min-width:0;background:var(--accent);border-radius:4px 4px 0 0;min-height:4px}
+.prog .stats{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 2px}
+.prog svg.trend{width:100%;height:56px;display:block;max-width:100%}
+.prog .card{overflow:hidden}
 .cols{display:block}
 .daynote{display:inline-block;margin-top:6px;background:rgba(22,163,74,.12);border:1px solid rgba(22,163,74,.35);border-radius:10px;padding:4px 10px;font-weight:600;font-size:15px}
 .hold{display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap}
@@ -439,9 +444,11 @@ function startSession(mode){
   save(s); store.set("wfg-demo-current", s.key); store.set("wfg-demo-mode", mode); return s;
 }
 /* Counted sets: a superset round (a + b) counts as ONE set. */
-function counts(s){ let d=0,t=0; const items=itemsOf(s);
-  s.sets.forEach((a,i)=>{ const it=items[i]; if(it.ss===2) return;
-    a.forEach((x,j)=>{ t++; const done = it.ss===1 ? (x.d && s.sets[i+1][j] && s.sets[i+1][j].d) : x.d; if(done) d++; }); });
+function counts(s){ let d=0,t=0; const items=itemsOf(s), sets=Array.isArray(s.sets)?s.sets:[];
+  sets.forEach((a,i)=>{ const it=items[i]; if(!it||it.ss===2) return;
+    (Array.isArray(a)?a:[]).forEach((x,j)=>{ if(!x||typeof x!=="object") return; t++;
+      const p=Array.isArray(sets[i+1])?sets[i+1][j]:null;
+      const done = it.ss===1 ? (x.d && p && typeof p==="object" && p.d) : x.d; if(done) d++; }); });
   return {d,t}; }
 function planSets(mode,d,ramp){ return PLANS[mode][d].reduce((a,x)=>a+(x.ss===2?0:(ramp?Math.min(RAMP_SETS,x.sets):x.sets)),0); }
 function rxText(it,n){ return it.repsText ? n+' sets · '+it.repsText : n+' × '+it.reps; }
@@ -461,7 +468,7 @@ function sessionItemIds(s){
 }
 function histCounts(s){
   if(s.mode&&PLANS[s.mode]&&PLANS[s.mode][s.day]) return counts(s);
-  let d=0,t=0; (s.sets||[]).forEach(a=>a.forEach(x=>{ t++; if(x.d) d++; })); return {d,t};
+  let d=0,t=0; (Array.isArray(s.sets)?s.sets:[]).forEach(a=>(Array.isArray(a)?a:[]).forEach(x=>{ if(!x||typeof x!=="object") return; t++; if(x.d) d++; })); return {d,t};
 }
 function finishedSessions(){
   const list=[];
@@ -473,6 +480,25 @@ function finishedSessions(){
   }catch(e){}
   list.sort((a,b)=>(b.completedAt||Date.parse(b.date)||0)-(a.completedAt||Date.parse(a.date)||0));
   return list;
+}
+function num0(v){ const n=parseFloat(v); return isFinite(n)&&n>=0?n:0; }
+function parseDay(s){ const m=String(s||"").match(/^(\d{4})-(\d{2})-(\d{2})$/); if(!m) return null; const y=+m[1],mo=+m[2],d=+m[3], dt=new Date(y,mo-1,d); return (dt.getFullYear()===y&&dt.getMonth()===mo-1&&dt.getDate()===d)?dt:null; }
+function isoMon(dt){ const d=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()); d.setDate(d.getDate()-((d.getDay()+6)%7)); return d; }
+function ymd(dt){ return dt.getFullYear()+"-"+pad(dt.getMonth()+1)+"-"+pad(dt.getDate()); }
+function weekId(s){ const dt=parseDay(s); return dt?ymd(isoMon(dt)):""; }
+function fmtN(n){ if(!isFinite(n)||n<0) n=0; const x=Math.round(n*10)/10; return x%1?x.toFixed(1):String(Math.round(x)); }
+function sessLoad(s){ let reps=0,vol=0; (Array.isArray(s.sets)?s.sets:[]).forEach(a=>(Array.isArray(a)?a:[]).forEach(x=>{ if(x&&typeof x==="object"&&x.d){ const r=num0(x.r),w=num0(x.w); reps+=r; vol+=r*w; } })); return {reps,vol}; }
+function weekStreak(have, thisMon){
+  const thisK=ymd(thisMon), lastK=ymd(new Date(thisMon.getFullYear(),thisMon.getMonth(),thisMon.getDate()-7));
+  if(!have[thisK]&&!have[lastK]) return 0;
+  let m=have[thisK]?new Date(thisMon):new Date(thisMon.getFullYear(),thisMon.getMonth(),thisMon.getDate()-7), n=0;
+  while(have[ymd(m)]){ n++; m=new Date(m.getFullYear(),m.getMonth(),m.getDate()-7); }
+  return n;
+}
+function trendPoly(vals){
+  const w=200,h=56,p=6,n=vals.length,lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals),span=hi-lo||1;
+  const pts=vals.map((v,i)=>{ const x=p+(n<2?(w-2*p)/2:i*(w-2*p)/(n-1)), y=h-p-((v-lo)/span)*(h-2*p); return (Math.round(x*10)/10)+","+(Math.round(y*10)/10); }).join(" ");
+  return '<svg class="trend" viewBox="0 0 '+w+' '+h+'" width="100%" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="'+pts+'"/></svg>';
 }
 
 /* ============ AUDIO (unlocked on first tap) ============ */
@@ -803,7 +829,7 @@ function viewHome(){
     (s?'':'<div class="chooser" role="group" aria-label="Choose a day">'+["A","B","C"].map(d=>'<button data-day="'+d+'" aria-pressed="'+(d===day)+'"'+(d===day?' class="on"':'')+'>Day '+dayLabel(d)+'</button>').join("")+'</div>')+
     modePill(s)+startBtn(s)+
     (s?'<button class="linkbtn small" id="restartBtn">Start this workout over</button>':'')+
-    '<div class="links"><a href="#/history" id="historyLink">History</a>'+FOOT+'</div></div>';
+    '<div class="links"><a href="#/history" id="historyLink">History</a> · <a href="#/progress" id="progressLink">Progress</a>'+FOOT+'</div></div>';
   wireModeStart(s);
   app.querySelectorAll("[data-day]").forEach(b=>b.onclick=()=>{ store.set("wfg-demo-pick",b.dataset.day); render(); });
   if(s) $("restartBtn").onclick=()=>{ if(confirm("Clear the checked sets and start this workout over?")){ cancelRest(false); store.del(s.key); store.del("wfg-demo-current"); pickMode=null; render(); } };
@@ -905,10 +931,55 @@ function viewDone(){
   app.innerHTML='<div class="wrap done"><div class="big">✅</div><h1 id="doneTitle">Day '+dayLabel(last.day)+' done — '+last.done+' of '+last.total+' sets</h1>'+
     '<p class="muted">'+(MODES[last.mode]?MODES[last.mode]+' workout. ':'')+'Next time: Day '+dayLabel(nextDay())+'</p><div style="height:20px"></div>'+
     '<button class="btn primary" id="homeBtn" style="width:100%;max-width:360px">Back to home</button>'+
-    '<p style="margin-top:28px"><a href="#/history" id="historyLink">History</a> · <a href="#/about">About the plan</a></p>'+FOOT+'</div>';
+    '<p style="margin-top:28px"><a href="#/history" id="historyLink">History</a> · <a href="#/progress" id="progressLink">Progress</a> · <a href="#/about">About the plan</a></p>'+FOOT+'</div>';
   $("homeBtn").onclick=()=>go("#/");
 }
 
+function viewProgress(){
+  const sessions=finishedSessions();
+  let body;
+  if(!sessions.length){
+    body='<p class="muted" id="progressEmpty">No finished workouts yet. Complete a session to see your streak, personal bests, and weekly volume.</p><p><a href="#/" id="startWorkout">Start a workout</a></p>';
+  } else {
+    const thisMon=isoMon(parseDay(today())||new Date());
+    const keys=[]; for(let i=7;i>=0;i--){ const d=new Date(thisMon.getFullYear(),thisMon.getMonth(),thisMon.getDate()-i*7); keys.push(ymd(d)); }
+    const wc={}; keys.forEach(k=>wc[k]=0); const have={};
+    sessions.forEach(s=>{ const k=weekId(s.date); if(k) have[k]=1; if(k in wc) wc[k]++; });
+    const mx=Math.max.apply(null,keys.map(k=>wc[k]))||1, streak=weekStreak(have,thisMon);
+    const bars=keys.map(k=>'<i data-n="'+wc[k]+'" style="height:'+(4+Math.round(wc[k]/mx*48))+'px"></i>').join("");
+    const wo=sessions.map(s=>{
+      const t=sessLoad(s), modeLabel=MODES[s.mode]||"Home";
+      return '<div class="card wosess"><div class="hist-top"><b>'+esc(s.date||"")+'</b> <span class="muted">· Day '+esc(dayLabel(s.day))+' · '+esc(modeLabel)+'</span></div>'+
+        '<div class="muted small">'+fmtN(t.reps)+' reps · '+fmtN(t.vol)+' lb</div></div>';
+    }).join("");
+    const map={};
+    sessions.slice().reverse().forEach(s=>{
+      const ids=sessionItemIds(s);
+      (Array.isArray(s.sets)?s.sets:[]).forEach((arr,idx)=>{
+        const id=ids[idx]; if(!id||!EX[id]) return;
+        const done=(Array.isArray(arr)?arr:[]).filter(x=>x&&typeof x==="object"&&x.d); if(!done.length) return;
+        let maxW=0; done.forEach(x=>{ const w=num0(x.w); if(w>maxW) maxW=w; });
+        let bestR=0; done.forEach(x=>{ const w=num0(x.w), r=num0(x.r); if((maxW===0||w===maxW)&&r>bestR) bestR=r; });
+        const rec=map[id]||(map[id]={id,name:EX[id].name,pts:[],pbW:0,pbR:0});
+        if(maxW>0) rec.pts.push(maxW);
+        if(maxW>rec.pbW){ rec.pbW=maxW; rec.pbR=bestR; }
+        else if(maxW===rec.pbW && bestR>rec.pbR) rec.pbR=bestR;
+      });
+    });
+    const exs=Object.keys(map).map(id=>map[id]).sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:0).map(rec=>{
+      const pb=rec.pbW>0?('PB '+fmtN(rec.pbW)+' lb × '+fmtN(rec.pbR)):(rec.pbR>0?('PB '+fmtN(rec.pbR)+' reps'):'No numbered sets yet');
+      const trend=rec.pts.length>=2?trendPoly(rec.pts):'<p class="muted small">Need another session for a weight trend</p>';
+      return '<div class="card exprog"><b>'+esc(rec.name)+'</b><div class="muted small">'+pb+'</div>'+trend+'</div>';
+    }).join("");
+    body='<h2 class="sec">Summary</h2><p class="muted small" id="weekCaption">Workouts per week (last 8 weeks)</p>'+
+      '<div class="weekrow" id="weekRow">'+bars+'</div>'+
+      '<div class="stats"><span id="streak">Current streak: '+streak+' week'+(streak===1?'':'s')+'</span>'+
+      '<span id="totalWorkouts">'+sessions.length+' workout'+(sessions.length===1?'':'s')+'</span></div>'+
+      '<h2 class="sec">Workouts</h2>'+wo+
+      '<h2 class="sec">Exercises</h2>'+(exs||'<p class="muted">No completed sets yet.</p>');
+  }
+  app.innerHTML='<div class="wrap prog"><p><a href="#/" id="backHome">← Home</a></p><h1>Progress</h1>'+body+FOOT+'</div>';
+}
 function viewHistory(){
   const sessions=finishedSessions();
   let body;
@@ -916,9 +987,9 @@ function viewHistory(){
   else{
     body=sessions.map(s=>{
       const ids=sessionItemIds(s), c=histCounts(s), modeLabel=MODES[s.mode]||"Home";
-      const rows=(s.sets||[]).map((arr,idx)=>{
+      const rows=(Array.isArray(s.sets)?s.sets:[]).map((arr,idx)=>{
         const id=ids[idx]; if(!id||!EX[id]) return "";
-        const done=arr.filter(x=>x.d);
+        const done=(Array.isArray(arr)?arr:[]).filter(x=>x&&typeof x==="object"&&x.d);
         if(!done.length) return '<li class="muted">'+esc(EX[id].name)+' — skipped</li>';
         const reps=done.map(x=>esc(x.r||"?")).join(", ");
         const wSet=done.find(x=>x.w);
@@ -1007,6 +1078,7 @@ function render(){
   else if(h==="#/done") viewDone();
   else if(h==="#/about") viewAbout();
   else if(h==="#/history") viewHistory();
+  else if(h==="#/progress") viewProgress();
   else if(h.startsWith("#/ex/")) viewExercise(decodeURIComponent(h.slice(5)));
   else { animState=null; viewHome(); }
   if(!h.startsWith("#/go")&&!h.startsWith("#/ex")) animState=animState&&animState.svg.isConnected?animState:null;
