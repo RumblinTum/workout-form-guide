@@ -52,10 +52,9 @@ li{margin:4px 0}
 .tag{display:inline-block;border-radius:10px;padding:4px 10px;font-weight:600;font-size:14px}
 .tag.kb{background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.5)}
 .tag.fail{background:rgba(220,38,38,.09);border:1px solid rgba(220,38,38,.35)}
-.wt{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 10px}
+.wt{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:4px 0 10px}
 .wt label{font-weight:700;font-size:16px}
-.wt input{width:104px;height:48px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:20px;font-weight:700;text-align:center}
-.wt .hint{font-size:14px;color:var(--muted)}
+.wt .hint{font-size:14px;color:var(--muted);min-width:0}
 h2.sec{font-size:22px;margin:22px 0 2px}
 .linkbtn{background:none;border:0;color:var(--accent);text-decoration:underline;padding:8px}
 .foot{font-size:13px;color:var(--muted);text-align:center;margin-top:10px}
@@ -80,15 +79,15 @@ h2.sec{font-size:22px;margin:22px 0 2px}
 .anim .pp{position:absolute;right:8px;bottom:8px;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);font-size:15px}
 .sets-head{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px}
 .sets-head b{font-size:18px}
-.sets{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;margin-top:8px}
-.set{display:flex;flex-direction:column;align-items:center;gap:6px}
+.sets{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(96px,100%),1fr));gap:10px;margin-top:8px}
+.set{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
 .box{width:100%;height:84px;border-radius:16px;border:3px solid var(--line);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;font-size:15px;transition:background .15s,border-color .15s}
 .box .ck{font-size:30px;line-height:1;height:32px}
 .box.on{background:var(--ok);border-color:var(--ok);color:#fff}
 .box.next{border-color:var(--accent);box-shadow:0 0 0 4px rgba(37,99,235,.25)}
 .box.ssgo{overflow:hidden}
 .box .ssl{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-width:0;max-width:100%;padding:0 6px;box-sizing:border-box;font-size:13px;line-height:1.15;text-align:center}
-.set input{width:72px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-align:center;font-size:16px}
+.set input{width:72px;max-width:100%;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-align:center;font-size:16px}
 .set input.need{border-color:var(--warn);box-shadow:0 0 0 3px rgba(180,83,9,.25)}
 #repsNeed{display:none;color:var(--warn);font-weight:600;font-size:14px;margin-top:8px}
 #repsNeed.show{display:block}
@@ -271,7 +270,7 @@ const RULES = [
   "Rest: big lifts 2–3 min at the gym, 90 s at home; small moves 45–75 s. Each exercise's timer starts at its own default; −15 / +15 is remembered for that exercise.",
   "When you hit the top of the rep range with clean form, go heavier. Gym: add 5–10 lb. Home: next dumbbell up, then harder versions (3–4 second lowering, pauses, single-arm / single-leg).",
   "First two weeks: 2 sets of everything.",
-  "The weight box on each exercise remembers the last weight you entered (separately for Home and Gym)."
+  "Each set has its own weight box. The first set's weight is remembered for next time (Home and Gym stay separate)."
 ];
 const EQUIP = "Home equipment: dumbbells 5–25 lb (5-lb steps), 25s and 35s, and a 35 lb kettlebell. ⭐ = kettlebell works best.";
 const RAMP_DAYS = 14, RAMP_SETS = 2;
@@ -393,9 +392,10 @@ const lastMode = () => { const m=store.get("wfg:mode"); return MODES[m]?m:null; 
 /* per-exercise rest (default from the plan; −15/+15 remembered per mode + exercise) */
 function restFor(mode,it){ const m=store.get("wfg:restx")||{}, v=m[mode+":"+it.id]; return (typeof v==="number"&&v>=15&&v<=600)?v:it.rest; }
 function setRestFor(mode,id,v){ const m=store.get("wfg:restx")||{}; m[mode+":"+id]=v; store.set("wfg:restx",m); }
-/* weight memory: last entered weight per exercise, separately for Home and Gym */
+/* weight memory: first set's weight per exercise, Home and Gym separate */
 function weights(mode){ const w=store.get("wfg:w:"+mode); return w&&typeof w==="object"?w:{}; }
 function setWeight(mode,id,v){ const w=weights(mode); if(v) w[id]=v; else delete w[id]; store.set("wfg:w:"+mode,w); }
+function cleanWt(v){ return String(v==null?"":v).replace(",",".").replace(/[^0-9.]/g,"").replace(/(\..*)\./g,"$1").slice(0,6); }
 /* sessions saved before Home/Gym existed: map them onto the new Home plan by exercise */
 function migrate(s){
   if(!s||s.mode) return s;
@@ -823,13 +823,15 @@ function exBody(id,it,s,i,mode){
     (tags?'<div class="tags">'+tags+'</div>':'')+(it.note?'<div class="daynote" id="dayNote">'+esc(it.note)+'</div>':'') : '';
   let setsHtml="";
   if(s){
-    if(!ex.bw){ const last=weights(s.mode)[id];
-      setsHtml+='<div class="wt"><label for="wt">'+esc(ex.wLabel||"Weight")+' (lb)</label><input id="wt" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" placeholder="lb" maxlength="6" value="'+esc(last||"")+'">'+
-        '<span class="hint" id="wtHint">'+(last?'Last time: '+esc(last)+' lb':(it&&it.start?'Suggested start: '+esc(it.start):''))+'</span></div>'; }
-    const arr=s.sets[i], nu=nextUnchecked(s,i), dn=arr.filter(x=>x.d).length;
+    const arr=s.sets[i], nu=nextUnchecked(s,i), dn=arr.filter(x=>x.d).length, mem=!ex.bw&&(weights(s.mode)[id]||"");
+    let chain=mem||"";
+    const wts=ex.bw?null:arr.map(x=>{ if(x&&x.w) chain=String(x.w); return x&&x.w?String(x.w):chain; });
+    if(!ex.bw) setsHtml+='<div class="wt"><label for="wt">'+esc(ex.wLabel||"Weight")+' (lb)</label><span class="hint" id="wtHint">'+(mem?'Last time: '+esc(mem)+' lb':(it&&it.start?'Suggested start: '+esc(it.start):''))+'</span></div>';
     setsHtml+='<div class="sets-head"><b>Sets</b><span id="setCount" class="muted">'+dn+'/'+arr.length+' sets</span></div><div class="sets">'+
       arr.map((x,j)=>'<div class="set"><button class="box'+(x.d?' on':'')+(j===nu?' next':'')+(it.ss===1&&j===nu?' ssgo':'')+'" data-set="'+j+'" aria-pressed="'+x.d+'" aria-label="Set '+(j+1)+'"><span class="ck">'+(x.d?'✓':'')+'</span>'+(it.ss===1&&j===nu?'<span class="ssl">Done → '+esc(EX[items[i+1].id].name)+'</span>':'Set '+(j+1))+'</button>'+
-        '<input type="number" inputmode="numeric" min="0" max="99" placeholder="reps" aria-label="Reps done set '+(j+1)+'" data-reps="'+j+'" value="'+esc(x.r)+'"></div>').join("")+'</div>'+
+        '<input type="number" inputmode="numeric" min="0" max="99" placeholder="reps" aria-label="Reps done set '+(j+1)+'" data-reps="'+j+'" value="'+esc(x.r)+'">'+
+        (ex.bw?'':'<input type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" maxlength="6" placeholder="lb" aria-label="Weight set '+(j+1)+' (lb)" data-wt="'+j+'"'+(j?'':' id="wt"')+' value="'+esc(wts[j])+'">')+
+        '</div>').join("")+'</div>'+
       '<div class="small" id="repsNeed" role="alert">Enter reps first</div>';
   }
   if(s&&it&&it.hold) setsHtml+='<div class="hold"><button class="btn ghost" id="holdBtn">Start hold</button><span class="hold-t" id="holdTime">0:00</span><span class="muted small">target '+it.hold[0]+'–'+it.hold[1]+' s</span></div>';
@@ -850,7 +852,10 @@ function viewWorkout(){
     '<button class="btn primary" id="nextBtn">'+(i===items.length-1?'Finish':'Next')+'</button></div></div>';
   mountFigure($("anim"),it.id);
   $("homeBtn").onclick=()=>go("#/");
-  const fresh=()=>{ const cur=current()||s; app.querySelectorAll("[data-reps]").forEach(inp=>{ const x=cur.sets[i]&&cur.sets[i][+inp.dataset.reps]; if(x) x.r=inp.value.slice(0,3); }); return cur; };
+  const fresh=()=>{ const cur=current()||s;
+    app.querySelectorAll("[data-reps]").forEach(inp=>{ const x=cur.sets[i]&&cur.sets[i][+inp.dataset.reps]; if(x) x.r=inp.value.slice(0,3); });
+    app.querySelectorAll("[data-wt]").forEach(inp=>{ const x=cur.sets[i]&&cur.sets[i][+inp.dataset.wt]; if(!x) return; const v=cleanWt(inp.value); x.w=v; if(!+inp.dataset.wt&&v) setWeight(s.mode,it.id,v); });
+    return cur; };
   $("backBtn").onclick=()=>{ cancelRest(false); const cur=fresh(); cur.idx=Math.max(0,i-1); save(cur); render(); window.scrollTo(0,0); };
   $("nextBtn").onclick=()=>{ cancelRest(false); if(i===items.length-1){ finish(fresh()); return; } const cur=fresh(); cur.idx=i+1; save(cur); render(); window.scrollTo(0,0); };
   app.querySelectorAll("[data-set]").forEach(b=>b.onclick=()=>{
@@ -867,8 +872,14 @@ function viewWorkout(){
       return;
     }
     x.r=rv; x.d=true;
-    if(!EX[it.id].bw){ const wt=$("wt"); if(wt) x.w=wt.value; }
-    const nxt=ss.sets[i][j+1]; if(nxt&&!nxt.r) nxt.r=x.r;
+    if(!EX[it.id].bw){
+      const wtInp=app.querySelector('[data-wt="'+j+'"]');
+      const wv=cleanWt(wtInp?wtInp.value:(x.w||""));
+      x.w=wv;
+      if(!j&&wv) setWeight(s.mode,it.id,wv);
+    }
+    const nxt=ss.sets[i][j+1];
+    if(nxt){ if(!nxt.r) nxt.r=x.r; if(!EX[it.id].bw&&!nxt.w&&x.w) nxt.w=x.w; }
     if(ss.rest) delete ss.rest;                   // a new check replaces any running timer
     save(ss);
     const tg=planAfterCheck(ss,i);
@@ -884,8 +895,23 @@ function viewWorkout(){
     inp.classList.remove("need"); const rn=$("repsNeed"); if(rn) rn.classList.remove("show");
     const ss=current(); if(!ss) return; ss.sets[i][+inp.dataset.reps].r=inp.value.slice(0,3); save(ss);
   });
-  const wt=$("wt");
-  if(wt) wt.oninput=()=>{ const v=wt.value.replace(",",".").replace(/[^0-9.]/g,"").replace(/(\..*)\./g,"$1").slice(0,6); if(v!==wt.value) wt.value=v; setWeight(s.mode,it.id,v); };
+  /* later sets that follow this box are decided once per edit (focus→blur), from the value before the
+     edit — not per keystroke, or an intermediate value ("15"→"5"→"25") would capture a drop set of 5 */
+  app.querySelectorAll("[data-wt]").forEach(inp=>{ inp.onblur=()=>{ inp._fw=null; }; inp.oninput=()=>{
+    const ss=current(); if(!ss) return;
+    const j=+inp.dataset.wt, row=ss.sets[i], x=row&&row[j]; if(!x) return;
+    if(!inp._fw){ const prev=x.w||""; inp._fw=[];
+      for(let k=j+1;k<row.length;k++){
+        const y=row[k], ik=app.querySelector('[data-wt="'+k+'"]'); if(!y||!ik) break;
+        if(ik.value&&ik.value!==prev&&y.w) break;
+        inp._fw.push(k);
+      } }
+    const v=cleanWt(inp.value); if(v!==inp.value) inp.value=v;
+    x.w=v;
+    if(!j&&v) setWeight(s.mode,it.id,v);
+    inp._fw.forEach(k=>{ const y=row[k], ik=app.querySelector('[data-wt="'+k+'"]'); if(y&&ik){ ik.value=v; y.w=v; } });
+    save(ss);
+  }; });
   if(it.hold) wireHold(it.hold);
   if(s.rest) showRest();
 }
@@ -957,6 +983,12 @@ function viewProgress(){
   }
   app.innerHTML='<div class="wrap prog"><p><a href="#/" id="backHome">← Home</a></p><h1>Progress</h1>'+body+FOOT+'</div>';
 }
+function histSets(done){
+  const ws=done.map(x=>x&&x.w?String(x.w):"");
+  const same=!!ws.length&&ws.every(w=>w&&w===ws[0]);
+  if(ws.some(Boolean)&&!same) return done.map(x=>esc(x.r||"?")+(x.w?"×"+esc(x.w):"")).join(", ");
+  return done.map(x=>esc(x.r||"?")).join(", ")+(same?" @ "+esc(ws[0])+" lb":"");
+}
 function viewHistory(){
   const sessions=finishedSessions();
   let body;
@@ -968,9 +1000,7 @@ function viewHistory(){
         const id=ids[idx]; if(!id||!EX[id]) return "";
         const done=(Array.isArray(arr)?arr:[]).filter(x=>x&&typeof x==="object"&&x.d);
         if(!done.length) return '<li class="muted">'+esc(EX[id].name)+' — skipped</li>';
-        const reps=done.map(x=>esc(x.r||"?")).join(", ");
-        const wSet=done.find(x=>x.w);
-        return '<li>'+esc(EX[id].name)+': '+reps+(wSet?' @ '+esc(wSet.w)+' lb':'')+'</li>';
+        return '<li>'+esc(EX[id].name)+': '+histSets(done)+'</li>';
       }).join("");
       return '<div class="card hist"><div class="hist-top"><b>'+esc(s.date||"")+'</b> <span class="muted">· Day '+esc(dayLabel(s.day))+' · '+esc(modeLabel)+'</span></div>'+
         '<div class="muted small">'+c.d+' of '+c.t+' sets</div><ul class="hexlist">'+rows+'</ul></div>';
